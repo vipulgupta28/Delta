@@ -1,0 +1,88 @@
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
+const Navbar: React.FC = () => {
+    const [visible, setVisible] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const navigate = useNavigate();
+    const toggleDropdown = () => {
+        setVisible((prev) => !prev);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setVisible(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <>
+            <nav className="relative">
+                <div className="flex justify-between p-10 items-center">
+                    <h1 className="text-5xl font-bold">DELTA</h1>
+                    
+                    <input 
+                        type="text"
+                        placeholder="Search for Topics, Channels, Creators"
+                        className="border border-gray-400 rounded-[6px] p-3 w-200"
+                    />
+                    
+                    <button
+                        onClick={toggleDropdown}
+                        className="bg-white hover:cursor-pointer hover:bg-gray-200 rounded-full font-bold transition duration-400 w-13 h-13 flex items-center justify-center text-black"
+                    >
+                        P
+                    </button>
+                </div>
+
+                <AnimatePresence>
+                    {visible && (
+                        <motion.div
+                            ref={dropdownRef}
+                            className="absolute right-10 bg-white shadow-lg border border-gray-200 rounded-md w-60 p-3"
+                            initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                            <ul className="flex flex-col gap-2">
+                                <li
+                                onClick={()=>navigate("/ChannelPage")}
+                                 className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">My Channel</li>
+                                <li className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">Theme</li>
+
+                                <li 
+                                onClick={() => navigate("/OTPgatewaypage")}
+                                className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">
+                                Change Username
+                                </li>
+
+                                <li
+                                onClick={() => navigate("/OTPgatewaypage")}
+                                className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">
+                                Change Password
+                                </li>
+
+                                <li
+                                onClick={() => navigate("/OTPgatewaypage")}
+                                className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">
+                                Change Email
+                                </li>
+
+                                <li className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">Sign Out</li>
+                            </ul>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </nav>
+        </>
+    );
+};
+
+export default Navbar;
