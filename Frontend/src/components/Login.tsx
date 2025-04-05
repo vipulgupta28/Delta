@@ -116,29 +116,40 @@ const Login: React.FC = () => {
           </motion.div>
 
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-          >
-            {loading ? (
-              <div className="text-center text-gray-700 font-medium">
-                Logging in...
-                <motion.div
-                  className="w-6 h-6 border-2 border-black border-t-transparent rounded-full mx-auto mt-2"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                />
-              </div>
-            ) : (
-              <motion.button
-           
-                onClick={handleLogin}
-                className="w-full hover:cursor-pointer bg-black text-white p-3 rounded-lg font-semibold shadow-md transition-all duration-300"
-              >
-                Login
-              </motion.button>
-            )}
-          </motion.div>
+  initial={{ y: 20, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ duration: 0.5, delay: 0.8 }}
+>
+  {error && (
+    <motion.div
+      className="text-red-600 text-sm text-center font-medium mb-2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      {error}
+    </motion.div>
+  )}
+
+  {loading ? (
+    <div className="text-center text-gray-700 font-medium">
+      Logging in...
+      <motion.div
+        className="w-6 h-6 border-2 border-black border-t-transparent rounded-full mx-auto mt-2"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+      />
+    </div>
+  ) : (
+    <motion.button
+      onClick={handleLogin}
+      className="w-full hover:cursor-pointer bg-black text-white p-3 rounded-lg font-semibold shadow-md transition-all duration-300"
+    >
+      Login
+    </motion.button>
+  )}
+</motion.div>
+
 
           
           <motion.p
