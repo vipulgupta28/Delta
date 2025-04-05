@@ -1,118 +1,180 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { motion } from "framer-motion";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  
   const [showPass, setShowPass] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const showPassword = () => {
+  const togglePassword = () => {
     setShowPass(!showPass);
   };
 
-  const onClickSignUp = () => {
-    navigate("/SignUpPage");
-  };
-
-  const onClickForgotPassword = () => {
+  const handleForgotPassword = () => {
     navigate("/OTPgatewayPage");
   };
 
-  const onClickLogin = async () => {
-    try {
-      setLoading(true); 
+  const handleLogin = async () => {
+    setLoading(true);
+    setError("");
 
+    try {
       const response = await axios.post("http://localhost:3000/api/v1/login-into", {
         enteredUsername: username,
-        enteredPassword: password
+        enteredPassword: password,
       });
 
       if (response.status === 200) {
+
+        localStorage.setItem("username",username);
         setTimeout(() => {
-          setLoading(false); 
-          navigate("/homepage"); 
+          setLoading(false);
+          navigate("/homepage");
         }, 1000);
       }
     } catch (error) {
-      setLoading(false); 
-      console.error(error);
-      alert("Invalid credentials");
+      setLoading(false);
+      setError("Invalid username or password.");
     }
   };
 
   return (
-    <>
-      <div className="min-h-screen flex flex-col justify-center items-center gap-10">
-        <h1 className="text-5xl font-bold selection:bg-white selection:text-black">
-          Login To DELTA
+    <motion.div
+      className="min-h-screen flex items-center justify-center bg-black px-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
+      
+      <motion.div
+        className="hidden lg:flex flex-col items-center justify-center w-1/2 text-white"
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+      >
+        <h1 className="text-5xl font-extrabold tracking-tight selection:bg-white selection:text-black">
+          The Real, Unbiased News.
+        </h1>
+      </motion.div>
+
+      
+      <motion.div
+        className="w-full lg:w-1/2 bg-white rounded-2xl p-10 max-w-lg shadow-2xl"
+        initial={{ x: 100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+      >
+        <h1 className="text-4xl font-extrabold text-black text-center mb-8">
+          Welcome Back to <span className="text-gray-800 font-extrabold">DELTA</span>
         </h1>
 
-        <div className="flex flex-col gap-10">
-          <div className="flex flex-col gap-2">
-            <label className="selection:bg-white selection:text-black">Username</label>
+        <div className="space-y-6">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <label className="block text-sm font-bold text-gray-800 mb-1">Username</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
-              className="border p-3 w-100 rounded-[6px] selection:bg-white selection:text-black"
+              placeholder="Enter your username"
+              className="w-full p-3 rounded-lg border border-gray-300 focus:border-black  text-black transition-all duration-300"
             />
-          </div>
+          </motion.div>
 
-          <div className="flex flex-col gap-2">
-            <label className="selection:bg-white selection:text-black">Password</label>
-            <div className="relative w-100">
+          
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
+            <label className="block text-sm font-bold text-gray-800 mb-1">Password</label>
+            <div className="relative">
               <input
                 type={showPass ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                className="border p-3 w-full rounded-[6px] pr-12 selection:bg-white selection:text-black"
+                placeholder="Enter your password"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:border-black   text-black transition-all duration-300"
               />
-              <button
-                type="button"
-                onClick={showPassword}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xl text-white hover:cursor-pointer"
+              <motion.button
+               onClick={togglePassword}
+                className="absolute right-3 top-1/2 hover:cursor-pointer -translate-y-1/2 text-gray-600"
+             
               >
-                {showPass ? <FiEyeOff /> : <FiEye />}
-              </button>
+                {showPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+              </motion.button>
             </div>
-            <button
-              onClick={onClickForgotPassword}
-              className="text-sm font-medium hover:cursor-pointer hover:underline transition duration-400 self-end"
-            >
-              Forgot Password
-            </button>
-          </div>
-        </div>
+          </motion.div>
 
-        {loading ? (
-          <div className="text-lg font-semibold text-gray-600">Logging in...</div>
-        ) : (
-          <button
-            onClick={onClickLogin}
-            className="bg-white text-black w-100 p-3 font-medium rounded-[6px] hover:cursor-pointer hover:bg-gray-200 transition duration-300 selection:bg-black selection:text-white"
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
           >
-            Login
-          </button>
-        )}
+            {loading ? (
+              <div className="text-center text-gray-700 font-medium">
+                Logging in...
+                <motion.div
+                  className="w-6 h-6 border-2 border-black border-t-transparent rounded-full mx-auto mt-2"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
+            ) : (
+              <motion.button
+           
+                onClick={handleLogin}
+                className="w-full hover:cursor-pointer bg-black text-white p-3 rounded-lg font-semibold shadow-md transition-all duration-300"
+              >
+                Login
+              </motion.button>
+            )}
+          </motion.div>
 
-        <p className="flex text-gray-500 selection:bg-white selection:text-black">
-          Don't have an account yet?
-        </p>
-        <button
-          onClick={onClickSignUp}
-          className="bg-white text-black w-100 p-3 font-medium rounded-[6px] hover:cursor-pointer hover:bg-gray-200 transition duration-300 selection:bg-black selection:text-white"
-        >
-          SignUp
-        </button>
-      </div>
-    </>
+          
+          <motion.p
+            className="text-center text-gray-600 text-sm"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
+          >
+            <motion.button
+              onClick={handleForgotPassword}
+              className="text-black font-semibold hover:cursor-pointer hover:underline"
+      
+            >
+              Forgot Password?
+            </motion.button>
+          </motion.p>
+
+          
+          <motion.p
+            className="text-center text-gray-600 text-sm"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
+          >
+            Don't have an account?{" "}
+            <motion.button
+              onClick={() => navigate("/signuppage")}
+              className="text-black hover:cursor-pointer font-semibold hover:underline"
+             
+            >
+              Sign Up
+            </motion.button>
+          </motion.p>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

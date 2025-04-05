@@ -8,7 +8,7 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   return (
     <>
-      <div className=" left-5 h-screen w-50 pt-10 text-black flex flex-col gap-10 p-5">
+      <div className="  w-50  ml-5 text-white flex flex-col gap-10 p-5">
         <button
         onClick={()=>navigate("/homepage")}
          className="hover:bg-black hover:text-white hover:cursor-pointer w-40 animation duration-400 p-2 rounded flex gap-5 justify-left"><MdNewspaper fontSize={24}/>News</button>

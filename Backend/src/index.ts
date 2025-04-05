@@ -128,9 +128,11 @@ app.post("/api/v1/store-content", upload.single("video"), async (req, res) => {
             return res.status(400).json({ error: "No file uploaded." });
         }
 
+        const { title, description } = req.body;  // Extract title & description
         const file = req.file;
         const fileName = `${Date.now()}_${file.originalname}`;
 
+        // Upload video to Supabase storage
         const { data, error } = await supabase
             .storage
             .from("videos")  
@@ -144,38 +146,41 @@ app.post("/api/v1/store-content", upload.single("video"), async (req, res) => {
             throw error;
         }
 
+        // Get the public URL of the uploaded video
         const { data: publicUrlData } = supabase.storage
             .from("videos")
             .getPublicUrl(`public/${fileName}`);
 
         console.log("Uploaded File Public URL:", publicUrlData.publicUrl);
 
-        res.status(200).json({ publicUrl: publicUrlData.publicUrl });
-
+        // Store metadata (title, description, file URL) in Supabase database
         await supabase
-    .from("videos_metadata")  // Change to your table name
-    .insert([
-        {
-            file_name: fileName,
-            file_url: publicUrlData.publicUrl, // Store the public URL
-            uploaded_at: new Date(),
-        },
-    ]);
+            .from("videos_metadata")  // Change to your actual table name
+            .insert([
+                {
+                    file_name: fileName,
+                    file_url: publicUrlData.publicUrl, 
+                    title: title,  // Store title
+                    description: description,  // Store description
+                    uploaded_at: new Date(),
+                },
+            ]);
+
+        res.status(200).json({ publicUrl: publicUrlData.publicUrl });
 
     } catch (error) {
         console.error("Upload Failed:", error);
         res.status(500).json({ error: "File upload failed." });
     }
-
-    
 });
+
 
 
 app.get("/api/v1/get-videos", async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("videos_metadata")
-            .select("file_url, file_name");
+            .select("file_url, file_name, title, description, uploaded_at");
 
         if (error) throw error;
 
@@ -185,6 +190,7 @@ app.get("/api/v1/get-videos", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch videos" });
     }
 });
+
 
 
 

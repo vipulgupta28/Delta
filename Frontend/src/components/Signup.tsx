@@ -1,173 +1,238 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import OTPcomponent from "./OTPcomponent";
 import axios from "axios";
+import { motion } from "framer-motion";
 
- const Signup: React.FC = () => {
-    const [otp, setOtp] = useState(['', '', '', '']);
-    const[showPass, setShowPass] = useState(false);
-    const[input, setInput] = useState("");
-    const[loading ,setLoading] = useState(false);
-    const[username, setUsername] = useState("");
-    const[password, setPassword] = useState("");
-  
-    const validEmail = (input:string ) => /\S+@\S+\.\S+/.test(input);
+const Signup: React.FC = () => {
+  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [showPass, setShowPass] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-    const showPassword = () =>{
-        setShowPass(!showPass);
+  const validEmail = (input: string) => /\S+@\S+\.\S+/.test(input);
+  const showPassword = () => setShowPass(!showPass);
+  const navigate = useNavigate();
+
+  const sendOTP = async () => {
+    if (!validEmail(input)) {
+      alert("Please enter a valid email");
+      return;
     }
-    const navigate = useNavigate();
-
-    const onClickLogin = () =>{
-        navigate("/");
+    try {
+      await axios.post("http://localhost:3000/api/v1/get-otp", { data: input });
+    } catch (error) {
+      console.error(error);
+      alert("Error sending OTP");
     }
+  };
 
-    const sendOTP = async() =>{
-      if (!validEmail(input)) {
-        alert("Please enter a valid email");
-        return;
-      }
-      try{
-        await axios.post("http://localhost:3000/api/v1/get-otp", {data:input});
-      }
-      catch(error){
-        console.error(error);
-        alert("Please enter a valid email");
-      }
+  const verifyOTP = async () => {
+    const otpString = otp.join("");
+    try {
+      const response = await axios.post("http://localhost:3000/api/v1/verify-otp", {
+        otp: otpString,
+        userEmail: input,
+      });
+      alert(response.data);
+    } catch (error) {
+      console.log(error);
+      alert("Invalid OTP");
     }
+  };
 
-    const verifyOTP = async () =>{
-      const otpString = otp.join('');
-      try{
-        const response = await axios.post("http://localhost:3000/api/v1/verify-otp", {
-          otp:otpString,
-          userEmail:input
-        });
-        alert(response.data);
+  const signup = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post("http://localhost:3000/api/v1/insert-into-users-table", {
+        enteredUsername: username,
+        enteredEmail: input,
+        enteredPassword: password,
+      });
+
+      if (response.status === 201) {
+        setTimeout(() => {
+          setLoading(false);
+          navigate("/");
+        }, 1000);
       }
-      catch(error){
-        console.log(error);
-        alert("Invalid OTP");
-      }
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
     }
-
-    const signup = async () =>{
-
-      try{
-         const response = await axios.post("http://localhost:3000/api/v1/insert-into-users-table",{
-          enteredUsername: username,
-          enteredEmail: input,
-          enteredPassword: password,
-          
-          
-        })
-
-        if(response.status == 201){
-          setTimeout(()=>{
-            setLoading(false),
-            navigate("/");
-          },1000);
-
-            
-        }
-      }
-      catch(error){
-        console.error(error);
-      }
-
-    }
-
+  };
 
   return (
-    <>
-      <div className="min-h-screen flex flex-col justify-center items-center gap-10">
-        <h1 className="text-5xl font-bold selection:bg-white selection:text-black">Signup to DELTA</h1>
+    <motion.div
+    style={{
+      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+      
+    }}
+      className="min-h-screen flex items-center justify-center bg-black px-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
+      {/* Left Section - Logo */}
+      <motion.div
+        className="hidden lg:flex flex-col items-center justify-center w-1/2 text-white"
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+      >
+        
+        <h1 className="text-5xl font-extrabold tracking-tight selection:bg-white selection:text-black">
+          The Real, Unbiased News.
+        </h1>
+      
+      </motion.div>
 
-        <div className="flex flex-col gap-8 items-center">
+      
+      <motion.div
+        className="w-full lg:w-1/2 bg-white rounded-2xl p-10 max-w-lg shadow-2xl"
+        initial={{ x: 100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+      >
+        <h1 className="text-4xl font-extrabold text-black text-center mb-8">
+          Join <span className="text-gray-800 font-extrabold">DELTA</span>
+        </h1>
 
-          <div className="flex flex-col gap-2 ">
-            <label className="selection:bg-white selection:text-black">Username</label>
+        <div className="space-y-6">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Username</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Create username"
-              className="border p-3 w-105 rounded-[6px] selection:bg-white selection:text-black"
+              placeholder="Create a username"
+              className="w-full p-3 rounded-lg border border-gray-300 focus:border-black  text-black transition-all duration-300"
             />
-          </div>
+          </motion.div>
 
-        <div className="flex flex-col gap-2">
-          <label className="selection:bg-white selection:text-black">Password</label>
-          <div className="relative w-105">
-            <input
-              type={showPass ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create password"
-              className="border p-3 w-full rounded-[6px] pr-16 selection:bg-white selection:text-black"
-            />
-            <button
-              type="button"
-              onClick={showPassword}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xl font-medium text-white hover:cursor-pointer"
-            >
-               {showPass ? <FiEyeOff /> : <FiEye />}
-            </button>
-          </div>
-        </div>
-
-          <div className="flex flex-col gap-2">
-            <label
-
-            className="selection:bg-white selection:text-black">Email</label>
-            <div className="flex gap-4">
-              <input
-                type="mail"
-                value={input}
-                onChange={(e)=>setInput(e.target.value)}
-                placeholder="Enter email"
-                className="border p-3 w-80 rounded-[6px] selection:bg-white selection:text-black"
-              />
-              <button
-              onClick={sendOTP} 
-              className="bg-white text-black font-medium p-2 rounded-[6px] hover:cursor-pointer hover:bg-gray-200 transition duration-300 selection:bg-black selection:text-white">
-                Send OTP
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 ">
-            <label className="selection:bg-white selection:text-black">OTP</label>
-            <div className="flex gap-4">
-            <OTPcomponent otp={otp} setOtp={setOtp} />
-              <button
-              onClick={verifyOTP}
-               className="bg-white text-black font-medium px-6 rounded-[6px] hover:cursor-pointer hover:bg-gray-200 transition duration-300 selection:bg-black selection:text-white">
-                Verify
-              </button>
-            </div>
-          </div>
-
-        {loading ? (
-          <div className="text-lg font-semibold text-gray-600">Signing up...</div>
-        ):(
-          <button
-          onClick={signup} 
-          className="bg-white text-black w-105 p-3 font-medium rounded-[6px] hover:cursor-pointer hover:bg-gray-200 transition duration-300 selection:bg-black selection:text-white">
-            SignUp
-          </button>
-        )}   
           
-          <p className="flex text-gray-500 selection:bg-white selection:text-black">Already have an account?</p>
-        <button
-       onClick={onClickLogin}
-        className="bg-white text-black w-105 p-3 font-medium rounded-[6px] hover:cursor-pointer hover:bg-gray-200 animation duration-400 selection:bg-black selection:text-white">
-            Login
-        </button>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Password</label>
+            <div className="relative">
+              <input
+                type={showPass ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a password"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:border-black  text-black transition-all duration-300"
+              />
+              <motion.button
+                onClick={showPassword}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                {showPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+              </motion.button>
+            </div>
+          </motion.div>
+
+         
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Email</label>
+            <div className="flex gap-3">
+              <input
+                type="email"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Enter your email"
+                className="flex-1 p-3 rounded-lg border border-gray-300 focus:border-black text-black transition-all duration-300"
+              />
+              <motion.button
+           
+                onClick={sendOTP}
+                className="bg-black hover:cursor-pointer text-white px-5 py-3 rounded-lg font-semibold shadow-md"
+              >
+                Send OTP
+              </motion.button>
+            </div>
+          </motion.div>
+
+          
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
+          >
+            <label className="block text-sm font-semibold text-gray-800 mb-1">OTP</label>
+            <div className="flex gap-2">
+              <OTPcomponent otp={otp} setOtp={setOtp} />
+              <motion.button
+                
+                onClick={verifyOTP}
+                className="bg-black hover:cursor-pointer text-white px-8 py-3 rounded-lg font-semibold shadow-md"
+              >
+                Verify
+              </motion.button>
+            </div>
+          </motion.div>
+
+          
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
+          >
+            {loading ? (
+              <div className="text-center text-gray-700 font-medium">
+                Signing up...
+                <motion.div
+                  className="w-6 h-6 border-2 border-black border-t-transparent rounded-full mx-auto mt-2"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
+            ) : (
+              <motion.button
+              
+                onClick={signup}
+                className="w-full bg-black hover:cursor-pointer text-white p-3 rounded-lg font-semibold shadow-md transition-all duration-300"
+              >
+                Sign Up
+              </motion.button>
+            )}
+          </motion.div>
+
+         
+          <motion.p
+            className="text-center text-gray-600 text-sm"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.1 }}
+          >
+            Already have an account?{" "}
+            <motion.button
+              onClick={() => navigate("/")}
+              className="text-black font-semibold hover:cursor-pointer hover:underline"
+            
+            >
+              Login
+            </motion.button>
+          </motion.p>
         </div>
-      </div>
-    </>
+      </motion.div>
+    </motion.div>
   );
 };
- export default Signup
+
+export default Signup;

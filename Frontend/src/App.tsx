@@ -6,7 +6,14 @@ export const App:React.FC = () =>{
   return(
     <>
     <BrowserRouter>
-        <AppRoutes />
+    <div className="bg-black min-h-screen"
+     style={{
+      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+      
+    }}>
+    <AppRoutes />
+    </div>
+        
     </BrowserRouter>
     </>
   )

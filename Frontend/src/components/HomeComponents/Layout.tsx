@@ -5,20 +5,20 @@ import Navbar from "./Navbar";
 
 const Layout: React.FC = () => {
   return (
-    <div className="flex flex-col h-screen w-screen text-black">
+    <div className="flex flex-col h-screen w-screen bg-black text-white">
       {/* Navbar */}
-      <div className="w-full h-16">
+      <div className="w-full">
         <Navbar />
       </div>
 
-      <div className="flex ">
+      <div className="flex flex-1">
         {/* Sidebar */}
-        <div className="w-60 mt-10 h-full">
+        <div className="w-60 mt-10">
           <Sidebar />
         </div>
 
-        {/* Main Video Area */}
-        <div className="flex-1 w-50 h-150 flex mt-10">
+        {/* VideoSpace */}
+        <div className="flex-1 mt-10 px-10">
           <VideoSpace />
         </div>
       </div>

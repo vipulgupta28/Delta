@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Navbar: React.FC = () => {
     const [visible, setVisible] = useState(false);
+    const [storedUsername, setStoredUsername] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
     const toggleDropdown = () => {
@@ -21,23 +22,30 @@ const Navbar: React.FC = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        const username = localStorage.getItem("username");
+        setStoredUsername(username);
+    }, []);
+
     return (
         <>
             <nav className="relative">
                 <div className="flex justify-between p-10 items-center">
-                    <h1 className="text-5xl font-bold">DELTA</h1>
+                    <h1
+                    onClick={()=> navigate("/homepage")}
+                     className="text-5xl hover:cursor-pointer font-extrabold">DELTA</h1>
                     
                     <input 
                         type="text"
                         placeholder="Search for Topics, Channels, Creators"
-                        className="border border-gray-400 rounded-[6px] p-3 w-200"
+                        className="border border-gray-400 rounded-[100px]  p-3 w-200"
                     />
                     
                     <button
                         onClick={toggleDropdown}
-                        className="bg-white hover:cursor-pointer hover:bg-gray-200 rounded-full font-bold transition duration-400 w-13 h-13 flex items-center justify-center text-black"
+                        className="bg-white hover:cursor-pointer hover:bg-gray-200 rounded-full font-bold transition duration-400 w-auto px-5 h-13 flex items-center justify-center text-black"
                     >
-                        P
+                        {storedUsername ?? "User"}
                     </button>
                 </div>
 
@@ -45,7 +53,7 @@ const Navbar: React.FC = () => {
                     {visible && (
                         <motion.div
                             ref={dropdownRef}
-                            className="absolute right-10 bg-white shadow-lg border border-gray-200 rounded-md w-60 p-3"
+                            className="absolute right-10 bg-white shadow-lg border border-gray-200 rounded-md w-60 p-3 z-50"
                             initial={{ opacity: 0, y: -10, scale: 0.9 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.9 }}
