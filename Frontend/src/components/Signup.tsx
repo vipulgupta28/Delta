@@ -54,6 +54,7 @@ const Signup: React.FC = () => {
       });
 
       if (response.status === 201) {
+        localStorage.setItem('email',input);
         setTimeout(() => {
           setLoading(false);
           navigate("/");

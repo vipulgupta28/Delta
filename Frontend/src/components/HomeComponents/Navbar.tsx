@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 
 const Navbar: React.FC = () => {
     const [visible, setVisible] = useState(false);
     const [storedUsername, setStoredUsername] = useState<string | null>(null);
+    const [email, setStoredEmail] = useState("");
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
     const toggleDropdown = () => {
@@ -26,6 +29,43 @@ const Navbar: React.FC = () => {
         const username = localStorage.getItem("username");
         setStoredUsername(username);
     }, []);
+
+    useEffect(() => {
+        const storedEmail = localStorage.getItem("email");
+        if (storedEmail) {
+          setStoredEmail(storedEmail);
+        } else {
+          setStoredEmail("your email"); 
+        }
+      }, []);
+
+    const changeUsername = async () =>{
+         await axios.post("http://localhost:3000/api/v1/get-otp",{
+                data:email
+        })
+        localStorage.setItem('key',"1");
+        
+
+        navigate("/otpgatewaypage")
+    }
+
+    const changePassword = async () =>{
+        await axios.post("http://localhost:3000/api/v1/get-otp",{
+               data:email
+       })
+       localStorage.setItem('key',"2");
+
+       navigate("/otpgatewaypage")
+   }
+
+   const changeEmail = async () =>{
+    await axios.post("http://localhost:3000/api/v1/get-otp",{
+           data:email
+   })
+   localStorage.setItem('key',"3");
+
+   navigate("/otpgatewaypage")
+}
 
     return (
         <>
@@ -59,26 +99,25 @@ const Navbar: React.FC = () => {
                             exit={{ opacity: 0, y: -10, scale: 0.9 }}
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                         >
-                            <ul className="flex flex-col gap-2">
+                            <ul className="flex flex-col gap-2 font-bold">
                                 <li
                                 onClick={()=>navigate("/ChannelPage")}
                                  className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">My Channel</li>
-                                <li className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">Theme</li>
-
+                               
                                 <li 
-                                onClick={() => navigate("/OTPgatewaypage")}
+                                onClick={changeUsername}
                                 className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">
                                 Change Username
                                 </li>
 
                                 <li
-                                onClick={() => navigate("/OTPgatewaypage")}
+                                onClick={changePassword}
                                 className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">
                                 Change Password
                                 </li>
 
                                 <li
-                                onClick={() => navigate("/OTPgatewaypage")}
+                                onClick={changeEmail}
                                 className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">
                                 Change Email
                                 </li>

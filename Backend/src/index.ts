@@ -192,13 +192,30 @@ app.get("/api/v1/get-videos", async (req, res) => {
 });
 
 
+//@ts-ignore
+app.get("/api/v1/get-users", async (req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("username");
+  
+      if (error) {
+        return res.status(500).json({ success: false, message: error.message });
+      }
+  
+      return res.status(200).json({ success: true, users: data });
+    } catch (err) {
+      return res.status(500).json({ success: false });
+    }
+  });
+  
 
 
 
 
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

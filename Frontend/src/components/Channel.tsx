@@ -57,7 +57,7 @@ const Channel: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center text-white  p-4 ">
+    <div className="w-200 flex justify-center text-black bg-white rounded-xl  p-4 ">
       <motion.div 
         className=" p-8 rounded-xl w-full text-center"
         variants={containerVariants}
@@ -65,16 +65,15 @@ const Channel: React.FC = () => {
         animate="visible"
       >
         <motion.h2 
-          className="text-3xl font-bold text-white mb-6"
+          className="text-3xl font-bold  mb-6"
           variants={itemVariants}
         >
           Upload Your Video
         </motion.h2>
 
         <motion.div variants={itemVariants} className="space-y-5 text-left">
-          {/* Title Input */}
           <div>
-            <label className="block text-white font-medium mb-2">Title</label>
+            <label className="block  font-medium mb-2">Title</label>
             <input
               type="text"
               placeholder="Video Title"
@@ -86,7 +85,7 @@ const Channel: React.FC = () => {
 
           {/* Description Input */}
           <div>
-            <label className="block text-white font-medium mb-2">Description</label>
+            <label className="block  font-medium mb-2">Description</label>
             <textarea
               placeholder="Video Description"
               value={description}
@@ -95,11 +94,8 @@ const Channel: React.FC = () => {
             />
           </div>
 
-          {/* File Inputs - Video & Thumbnail */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Video Input */}
             <div>
-              <label className="block text-white font-medium mb-2">Video</label>
+              <label className="  font-medium mb-2">Video</label>
               <input
                 type="file"
                 accept="video/*"
@@ -108,23 +104,10 @@ const Channel: React.FC = () => {
               />
             </div>
 
-            {/* Thumbnail Input */}
-            <div>
-              <label className="block text-gray-700 text-white font-medium mb-2">Thumbnail</label>
-              <input
-                type="file"
-                accept="image/*"
-                
-                className="w-full p-2   border border-dashed rounded-md bg-gray-50 text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          {/* Upload Button */}
           <motion.button
             onClick={uploadContent}
           
-            className="w-full bg-white text-black hover:cursor-pointer font-bold p-3 rounded-md hover:bg-gray-200 transition duration-300 mt-4"
+            className="w-full bg-black text-white hover:cursor-pointer font-bold p-3 rounded-md hover:bg-gray-800 transition duration-300 mt-4"
           >
             Upload Content
           </motion.button>

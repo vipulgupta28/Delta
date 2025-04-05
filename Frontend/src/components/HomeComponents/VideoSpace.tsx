@@ -13,6 +13,7 @@ const VideoSpace: React.FC = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(false);
+  const [direction, setDirection] = useState<"next" | "prev" | null>(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -30,75 +31,146 @@ const VideoSpace: React.FC = () => {
   // Scroll to next video
   const handleNext = () => {
     if (currentIndex < videos.length - 1) {
-      setFade(false); // Trigger fade-out
+      setDirection("next");
+      setFade(false); // Current video starts exiting
       setTimeout(() => {
         setCurrentIndex((prev) => prev + 1);
-        setFade(true); // Trigger fade-in
-      }, 200);
+        setFade(true); // Next video starts entering
+      }, 300);
     }
   };
 
-  // Scroll to previous video
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setFade(false);
+      setDirection("prev");
+      setFade(false); // Current video starts exiting
       setTimeout(() => {
         setCurrentIndex((prev) => prev - 1);
-        setFade(true);
-      }, 200);
+        setFade(true); // Previous video starts entering
+      }, 300);
     }
+  };
+
+  const getSlideAnimation = () => {
+    if (!fade && direction === "next") return "animate-exit-to-top";
+    if (!fade && direction === "prev") return "animate-exit-to-bottom";
+    if (fade && direction === "next") return "animate-enter-from-bottom";
+    if (fade && direction === "prev") return "animate-enter-from-top";
+    return "";
   };
 
   return (
     <div className="relative flex flex-col items-center">
+      {/* Custom CSS for Animations */}
+      
+      <style jsx>{`
+        @keyframes exitToTop {
+          0% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+        }
+
+        @keyframes exitToBottom {
+          0% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+        }
+
+        @keyframes enterFromBottom {
+          0% {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes enterFromTop {
+          0% {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .animate-exit-to-top {
+          animation: exitToTop 0.5s ease-in-out forwards;
+        }
+
+        .animate-exit-to-bottom {
+          animation: exitToBottom 0.5s ease-in-out forwards;
+        }
+
+        .animate-enter-from-bottom {
+          animation: enterFromBottom 0.5s ease-in-out forwards;
+        }
+
+        .animate-enter-from-top {
+          animation: enterFromTop 0.5s ease-in-out forwards;
+        }
+      `}</style>
+
       {/* Video Container */}
-      <div className="w-270 h-150 flex flex-col items-center bg-black text-white p-4 rounded-lg shadow-lg relative">
-        
+      <div className="w-250 h-130 flex flex-col items-center bg-black text-white p-4 rounded-lg shadow-lg relative overflow-hidden">
+
         {/* Title & Timestamp Container */}
         <div className="w-full flex justify-between items-center mb-4 px-2">
           <h2 className="text-lg font-bold">{videos[currentIndex]?.title || "Loading..."}</h2>
           <p className="text-sm text-gray-400">
             Uploaded:<br />
             {videos[currentIndex]?.uploaded_at
-              ? new Date(videos[currentIndex].uploaded_at).toLocaleString("en-US", { 
-                  year: "numeric", 
-                  month: "long", 
-                  day: "numeric", 
-                  hour: "2-digit", 
-                  minute: "2-digit", 
-                  second: "2-digit", 
-                  hour12: true 
-                }) 
+              ? new Date(videos[currentIndex].uploaded_at).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: true,
+                })
               : "Loading..."}
           </p>
         </div>
 
-        {/* Video Player with Fade Animation */}
+        {/* Video Player with Animation */}
         {videos.length > 0 ? (
           <video
             key={videos[currentIndex].file_url}
             src={videos[currentIndex].file_url}
-            className={`w-300 h-[90%] rounded-lg hover:cursor-pointer transition-opacity duration-500 ${
-              fade ? "opacity-100" : "opacity-0"
-            }`}
+            className={`w-full h-100 rounded-lg cursor-pointer transition-all duration-500 ${getSlideAnimation()}`}
             controls
             autoPlay
           />
         ) : (
-          <p>Loading videos...</p>
+          <p className="text-white">Loading videos...</p>
         )}
       </div>
 
       {/* Scroll Buttons */}
       <div className="absolute right-10 top-1/2 flex flex-col gap-7 transform -translate-y-1/2">
         <button
-          className="bg-white text-black p-4 hover:bg-black hover:text-white transition duration-400 cursor-pointer rounded-full shadow-xl border"
+          className="bg-white text-black p-4 hover:bg-gray-300 transition duration-400 cursor-pointer rounded-full shadow-xl border"
           onClick={handlePrev}
         >
           ▲
         </button>
         <button
-          className="bg-white text-black p-4 hover:bg-black hover:text-white transition duration-400 cursor-pointer rounded-full shadow-md border"
+          className="bg-white text-black p-4 hover:bg-gray-300 transition duration-400 cursor-pointer rounded-full shadow-md border"
           onClick={handleNext}
         >
           ▼
