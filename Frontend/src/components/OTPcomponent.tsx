@@ -1,4 +1,4 @@
-import React, { useRef} from 'react';
+import React, { useRef, useState } from 'react';
 
 interface OTPProps {
   otp: string[];
@@ -7,6 +7,7 @@ interface OTPProps {
 
 const OTPcomponent: React.FC<OTPProps> = ({ otp, setOtp }) => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
   const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -50,7 +51,7 @@ const OTPcomponent: React.FC<OTPProps> = ({ otp, setOtp }) => {
           key={index}
           type="text"
           maxLength={1}
-          placeholder='0'
+          placeholder={focusedIndex === index ? "" : "0"}
           className="w-16 h-12 text-center text-xl border rounded"
           ref={(el) => {
             inputRefs.current[index] = el!;
@@ -59,6 +60,8 @@ const OTPcomponent: React.FC<OTPProps> = ({ otp, setOtp }) => {
           onChange={(e) => handleChange(index, e)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
+          onFocus={() => setFocusedIndex(index)}
+          onBlur={() => setFocusedIndex(null)}
         />
       ))}
     </div>

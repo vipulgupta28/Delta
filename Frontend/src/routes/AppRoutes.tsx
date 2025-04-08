@@ -21,7 +21,6 @@ const AppRoutes:React.FC = () =>{
             <Route path="channelpage" element={<ChannelPage/>}/>
             <Route path="allchannelspage" element={<AllChannelsPage/>}/>
             <Route path="trendingpage" element={<TrendingPage/>}/>
-
         </Routes>
         </>
     )

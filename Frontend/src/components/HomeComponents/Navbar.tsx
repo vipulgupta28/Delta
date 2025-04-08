@@ -40,32 +40,34 @@ const Navbar: React.FC = () => {
       }, []);
 
     const changeUsername = async () =>{
+        navigate("/otpgatewaypage")
          await axios.post("http://localhost:3000/api/v1/get-otp",{
                 data:email
         })
-        localStorage.setItem('key',"1");
-        
-
-        navigate("/otpgatewaypage")
+        localStorage.setItem('key',"1");       
     }
 
     const changePassword = async () =>{
+        navigate("/otpgatewaypage")
         await axios.post("http://localhost:3000/api/v1/get-otp",{
                data:email
        })
        localStorage.setItem('key',"2");
-
-       navigate("/otpgatewaypage")
    }
 
    const changeEmail = async () =>{
+    
+   navigate("/otpgatewaypage")
     await axios.post("http://localhost:3000/api/v1/get-otp",{
            data:email
    })
    localStorage.setItem('key',"3");
+  }
 
-   navigate("/otpgatewaypage")
-}
+    const signout = () =>{
+        localStorage.removeItem("username");
+        navigate("/");
+    } 
 
     return (
         <>
@@ -122,7 +124,9 @@ const Navbar: React.FC = () => {
                                 Change Email
                                 </li>
 
-                                <li className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">Sign Out</li>
+                                <li
+                                onClick={signout} 
+                                className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">Sign Out</li>
                             </ul>
                         </motion.div>
                     )}

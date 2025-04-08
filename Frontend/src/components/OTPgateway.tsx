@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import OTPcomponent from './OTPcomponent';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const OTPgateway: React.FC = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
-  const [isMounted, setIsMounted] = useState(false); // To trigger animations on mount
+  const [isMounted, setIsMounted] = useState(false); 
   const [email, setStoredEmail] = useState("");
   
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ const OTPgateway: React.FC = () => {
     if (storedEmail) {
       setStoredEmail(storedEmail);
     } else {
-      setStoredEmail("your email"); // or handle the error as needed
+      setStoredEmail("your email"); 
     }
   }, []);
 
@@ -24,28 +26,50 @@ const OTPgateway: React.FC = () => {
     setIsMounted(true);
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const otpValue = otp.join('');
-    console.log('OTP Entered:', otpValue);
-    // API Call here
-    navigate("/TheChangePage");
-  };
-
+    try {
+      const response = await axios.post("http://localhost:3000/api/v1/verify-otp", {
+        otp: otpValue,
+        userEmail: email,  
+      });
   
+      toast.success(response.data.message); 
+      navigate("/TheChangePage");
+  
+    } catch (error: any) {
+      if (error.response) {
+        toast.error(error.response.data.message || "Invalid OTP");
+      } else {
+        toast.error("Something went wrong while verifying OTP");
+      }
+      console.error(error);
+    }
+  };
+  
+  const resendOtp = async () => {
+    try {
+      await axios.post("http://localhost:3000/api/v1/get-otp", {
+        data: email
+      });
+      toast.success("OTP resent successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to resend OTP");
+    }
+  };
   
 
   return (
     <div className="flex flex-col min-h-screen bg-white justify-center items-center gap-6">
-      {/* Heading with fade-in and slide-up animation */}
       <h1
         className={`text-2xl font-bold mb-4 transition-all duration-700 ${
           isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'
         }`}
       >
-        Enter OTP sent to registered email <br/>{email}
+        Enter OTP sent to registered email 
       </h1>
 
-      {/* OTP Component with fade-in and slide-up animation */}
       <div
         className={`transition-all duration-700 delay-100 ${
           isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'
@@ -54,7 +78,6 @@ const OTPgateway: React.FC = () => {
         <OTPcomponent otp={otp} setOtp={setOtp} />
       </div>
 
-      {/* Button with fade-in and slide-up animation */}
       <div className='flex gap-20'>
       <button
         onClick={handleSubmit}
@@ -66,6 +89,7 @@ const OTPgateway: React.FC = () => {
       </button>
 
       <button
+      onClick={resendOtp}
            className={`mt-4 bg-black text-white px-6 py-2 rounded hover:cursor-pointer hover:bg-gray-700 transition-all duration-700 delay-200 ${
             isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'
           }`}>

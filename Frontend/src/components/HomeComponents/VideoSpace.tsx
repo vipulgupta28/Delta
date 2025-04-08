@@ -28,14 +28,14 @@ const VideoSpace: React.FC = () => {
     fetchVideos();
   }, []);
 
-  // Scroll to next video
+
   const handleNext = () => {
     if (currentIndex < videos.length - 1) {
       setDirection("next");
-      setFade(false); // Current video starts exiting
+      setFade(false); 
       setTimeout(() => {
         setCurrentIndex((prev) => prev + 1);
-        setFade(true); // Next video starts entering
+        setFade(true); 
       }, 300);
     }
   };
@@ -43,10 +43,10 @@ const VideoSpace: React.FC = () => {
   const handlePrev = () => {
     if (currentIndex > 0) {
       setDirection("prev");
-      setFade(false); // Current video starts exiting
+      setFade(false); 
       setTimeout(() => {
         setCurrentIndex((prev) => prev - 1);
-        setFade(true); // Previous video starts entering
+        setFade(true); 
       }, 300);
     }
   };
@@ -61,9 +61,9 @@ const VideoSpace: React.FC = () => {
 
   return (
     <div className="relative flex flex-col items-center">
-      {/* Custom CSS for Animations */}
+     
       
-      <style jsx>{`
+      <style>{`
         @keyframes exitToTop {
           0% {
             transform: translateY(0);
@@ -125,10 +125,8 @@ const VideoSpace: React.FC = () => {
         }
       `}</style>
 
-      {/* Video Container */}
       <div className="w-250 h-130 flex flex-col items-center bg-black text-white p-4 rounded-lg shadow-lg relative overflow-hidden">
 
-        {/* Title & Timestamp Container */}
         <div className="w-full flex justify-between items-center mb-4 px-2">
           <h2 className="text-lg font-bold">{videos[currentIndex]?.title || "Loading..."}</h2>
           <p className="text-sm text-gray-400">
@@ -145,9 +143,10 @@ const VideoSpace: React.FC = () => {
                 })
               : "Loading..."}
           </p>
+          
         </div>
+       
 
-        {/* Video Player with Animation */}
         {videos.length > 0 ? (
           <video
             key={videos[currentIndex].file_url}
@@ -161,7 +160,6 @@ const VideoSpace: React.FC = () => {
         )}
       </div>
 
-      {/* Scroll Buttons */}
       <div className="absolute right-10 top-1/2 flex flex-col gap-7 transform -translate-y-1/2">
         <button
           className="bg-white text-black p-4 hover:bg-gray-300 transition duration-400 cursor-pointer rounded-full shadow-xl border"

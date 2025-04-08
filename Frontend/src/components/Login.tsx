@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState,useEffect } from "react";
+import {  useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
+import toast from 'react-hot-toast';
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const Login: React.FC = () => {
@@ -10,14 +11,30 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [email, setStoredEmail] = useState("");
   const [error, setError] = useState("");
 
   const togglePassword = () => {
     setShowPass(!showPass);
   };
 
-  const handleForgotPassword = () => {
-    navigate("/OTPgatewayPage");
+  useEffect(() => {
+          const storedEmail = localStorage.getItem("email");
+          if (storedEmail) {
+            setStoredEmail(storedEmail);
+          } else {
+            setStoredEmail("your email"); 
+          }
+        }, []);
+
+  const handleForgotPassword = async() => {
+    navigate("/OTPgatewaypage");
+     await axios.post("http://localhost:3000/api/v1/get-otp",{
+      data:email
+
+    })
+    localStorage.setItem('key',"2");
+
   };
 
   const handleLogin = async () => {
@@ -40,7 +57,7 @@ const Login: React.FC = () => {
       }
     } catch (error) {
       setLoading(false);
-      setError("Invalid username or password.");
+      toast.error("Invalid username or password.");
     }
   };
 
@@ -116,40 +133,40 @@ const Login: React.FC = () => {
           </motion.div>
 
           <motion.div
-  initial={{ y: 20, opacity: 0 }}
-  animate={{ y: 0, opacity: 1 }}
-  transition={{ duration: 0.5, delay: 0.8 }}
->
-  {error && (
-    <motion.div
-      className="text-red-600 text-sm text-center font-medium mb-2"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      {error}
-    </motion.div>
-  )}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            {error && (
+              <motion.div
+                className="text-red-600 text-sm text-center font-medium mb-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {error}
+              </motion.div>
+            )}
 
-  {loading ? (
-    <div className="text-center text-gray-700 font-medium">
-      Logging in...
-      <motion.div
-        className="w-6 h-6 border-2 border-black border-t-transparent rounded-full mx-auto mt-2"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-      />
-    </div>
-  ) : (
-    <motion.button
-      onClick={handleLogin}
-      className="w-full hover:cursor-pointer bg-black text-white p-3 rounded-lg font-semibold shadow-md transition-all duration-300"
-    >
-      Login
-    </motion.button>
-  )}
-</motion.div>
-
+            {loading ? (
+              <div className="text-center text-gray-700 font-medium">
+                Logging in...
+                <motion.div
+                  className="w-6 h-6 border-2 border-black border-t-transparent rounded-full mx-auto mt-2"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
+            ) : (
+              <motion.button
+                onClick={handleLogin}
+                className="w-full hover:cursor-pointer bg-black text-white p-3 rounded-lg font-semibold shadow-md transition-all duration-300"
+              >
+                Login
+              </motion.button>
+            )}
+          </motion.div>
+          
 
           
           <motion.p

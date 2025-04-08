@@ -1,16 +1,27 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 const Channel: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  
+  const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
   const uploadContent = async () => {
     if (!file) {
-      alert("Please select a video file first");
+      toast.error("Please select a video file first");
+      return;
+    }
+
+    if(!title.trim()){
+      toast.error("Please Enter Title");
+      return;
+    }
+
+    if(!description.trim()){
+      toast.error("Please Enter Description");
       return;
     }
   
@@ -20,7 +31,8 @@ const Channel: React.FC = () => {
     formData.append("description", description);
   
     try {
-      const response = await axios.post(
+      setUploading(true);
+      const res = await axios.post(
         "http://localhost:3000/api/v1/store-content",
         formData,
         {
@@ -30,11 +42,14 @@ const Channel: React.FC = () => {
         }
       );
   
-      console.log("Upload success:", response.data);
-      alert(`Video uploaded successfully! URL: ${response.data.publicUrl}`);
+      if(res.status == 200){
+        setUploading(false);
+        toast.success("Video uploaded Successfully");
+      }
+      
     } catch (error) {
-      console.error("Upload error:", error);
-      alert("Upload failed!");
+  
+      toast.error("Upload failed!");
     }
   };
   
@@ -68,6 +83,7 @@ const Channel: React.FC = () => {
           className="text-3xl font-bold  mb-6"
           variants={itemVariants}
         >
+          {}
           Upload Your Video
         </motion.h2>
 
@@ -83,7 +99,7 @@ const Channel: React.FC = () => {
             />
           </div>
 
-          {/* Description Input */}
+        
           <div>
             <label className="block  font-medium mb-2">Description</label>
             <textarea
@@ -104,14 +120,25 @@ const Channel: React.FC = () => {
               />
             </div>
 
-          <motion.button
+            <motion.button
             onClick={uploadContent}
-          
             className="w-full bg-black text-white hover:cursor-pointer font-bold p-3 rounded-md hover:bg-gray-800 transition duration-300 mt-4"
           >
-            Upload Content
+            {uploading ? (
+              <div className="flex items-center justify-center gap-2">
+                <motion.div
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+                <span>Uploading...</span>
+              </div>
+            ) : (
+              "Upload Content"
+            )}
           </motion.button>
-        </motion.div>
+          
+                  </motion.div>
       </motion.div>
     </div>
   );

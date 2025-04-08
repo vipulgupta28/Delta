@@ -128,11 +128,10 @@ app.post("/api/v1/store-content", upload.single("video"), async (req, res) => {
             return res.status(400).json({ error: "No file uploaded." });
         }
 
-        const { title, description } = req.body;  // Extract title & description
+        const { title, description } = req.body;  
         const file = req.file;
         const fileName = `${Date.now()}_${file.originalname}`;
 
-        // Upload video to Supabase storage
         const { data, error } = await supabase
             .storage
             .from("videos")  
@@ -146,22 +145,20 @@ app.post("/api/v1/store-content", upload.single("video"), async (req, res) => {
             throw error;
         }
 
-        // Get the public URL of the uploaded video
         const { data: publicUrlData } = supabase.storage
             .from("videos")
             .getPublicUrl(`public/${fileName}`);
 
         console.log("Uploaded File Public URL:", publicUrlData.publicUrl);
 
-        // Store metadata (title, description, file URL) in Supabase database
         await supabase
-            .from("videos_metadata")  // Change to your actual table name
+            .from("videos_metadata") 
             .insert([
                 {
                     file_name: fileName,
                     file_url: publicUrlData.publicUrl, 
-                    title: title,  // Store title
-                    description: description,  // Store description
+                    title: title, 
+                    description: description, 
                     uploaded_at: new Date(),
                 },
             ]);
@@ -210,10 +207,54 @@ app.get("/api/v1/get-users", async (req, res) => {
   });
   
 
+  app.post("/api/v1/update-username", async (req, res) => {
+    const { email, newUsername } = req.body;
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .update({ username: newUsername })
+        .eq("email", email);
+      
+      if (error) throw error;
+      res.status(200).json({ message: "Username updated successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Error updating username" });
+    }
+  });
+  
+  app.post("/api/v1/update-password", async (req, res) => {
+    const { email, newPassword } = req.body;
+    try {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-
-
-
+      const { data, error } = await supabase
+        .from("users")
+        .update({ password: hashedPassword })
+        .eq("email", email);
+  
+      if (error) throw error;
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Error updating password" });
+    }
+  });
+  
+  app.post("/api/v1/update-email", async (req, res) => {
+    const { oldEmail, newEmail } = req.body;
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .update({ email: newEmail })
+        .eq("email", oldEmail);
+  
+      if (error) throw error;
+      res.status(200).json({ message: "Email updated successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Error updating email" });
+    }
+  });
+  
 
 const PORT = process.env.PORT ;
 app.listen(PORT, () => {
