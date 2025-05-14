@@ -22,8 +22,6 @@ const Sidebar: React.FC = () => {
         className="hover:hover:bg-[#2c2c2c]  hover:cursor-pointer w-50 animation duration-400 p-2 rounded flex gap-5 justify-left"><FaFire fontSize={24}/>What's happening</button>
 
         
-
-
         <button 
         onClick={()=>navigate("/trendingpage")}
         className="hover:hover:bg-[#2c2c2c]  hover:cursor-pointer w-40 animation duration-400 p-2 rounded flex gap-5 justify-left"><FaFire fontSize={24}/>Trending</button>
@@ -31,7 +29,15 @@ const Sidebar: React.FC = () => {
          <button 
         onClick={()=>navigate("/researchpage")}
         className="hover:hover:bg-[#2c2c2c]  hover:cursor-pointer w-40 animation duration-400 p-2 rounded flex gap-5 justify-left"><FaFire fontSize={24}/>Our Research</button>
+
+        <div className="">
+         <button className="bg-white p-4 w-40 rounded-[50px] text-black font-medium hover:cursor-pointer hover:bg-gray-200">
+              Inbox
+            </button>
+        </div>
+       
       </div>
+
     </>
   );
 };

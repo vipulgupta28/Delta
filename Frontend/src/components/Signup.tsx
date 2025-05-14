@@ -82,8 +82,11 @@ const Signup: React.FC = () => {
       });
 
       if (response.status === 201) {
+         const userId = response.data.user_id; 
         localStorage.setItem('email',input);
         localStorage.setItem('username',username);
+         localStorage.setItem('user_id', userId);
+        
         setTimeout(() => {
           setLoading(false);
           navigate("/");

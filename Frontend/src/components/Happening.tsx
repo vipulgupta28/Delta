@@ -1,27 +1,85 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./HomeComponents/Navbar";
+import axios from "axios";
+import toast from "react-hot-toast";
 import Sidebar from "./HomeComponents/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
+
+type Post = {
+  id: string;
+  headline: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+};
 
 const Happening: React.FC = () => {
   const [isVisible, setisVisible] = useState(false);
   const [headline, setHeadline] = useState("");
   const [content, setContent] = useState("");
-  const [posts, setPosts] = useState<{ headline: string; content: string }[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  
+ 
+  const fetchPosts = async (pageNum: number) => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const res = await axios.get(`http://localhost:3000/api/v1/get-posts?page=${pageNum}&limit=5`);
+      const newPosts = res.data;
+
+      if (newPosts.length === 0) {
+        setHasMore(false);
+      } else {
+        setPosts(prev => [...prev, ...newPosts]);
+        setPage(prev => prev + 1);
+      }
+    } catch (err) {
+      toast.error("Failed to load posts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts(page);
+    const onScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.scrollHeight - 100 &&
+        !loading &&
+        hasMore
+      ) {
+        fetchPosts(page);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [page, loading, hasMore]);
 
   const createPost = () => {
     setisVisible(true);
   };
 
-  const Post = (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form from refreshing the page
-    if (!headline.trim() || !content.trim()) return;
+  const StorePosts = async () => {
+    const user_id= localStorage.getItem('user_id')
+    const response = await axios.post("http://localhost:3000/api/v1/store-posts",{
+        headline: headline,
+        content:content,
+        user_id: user_id
+    });
 
-    setPosts([{ headline, content }, ...posts]); // Add new post to top
-    setHeadline("");
-    setContent("");
-    setisVisible(false);
-  };
+    if(response.status === 200){
+        console.log("Post uploaded")
+    }
+  }
+
+
+
+  
+    
 
   return (
     <div className="flex flex-col h-screen w-screen bg-black text-white font-sans">
@@ -47,16 +105,7 @@ const Happening: React.FC = () => {
               </button>
             </div>
 
-            {/* Show posts */}
-            {posts.map((post, index) => (
-              <div
-                key={index}
-                className="bg-neutral-800 p-4 rounded-xl border border-neutral-700 space-y-2"
-              >
-                <h3 className="text-lg font-semibold">{post.headline}</h3>
-                <p className="text-sm text-gray-300">{post.content}</p>
-              </div>
-            ))}
+        
 
             {/* Modal */}
             <AnimatePresence>
@@ -83,7 +132,7 @@ const Happening: React.FC = () => {
                       <h2 className="text-xl font-semibold mb-4">
                         Share News With the World
                       </h2>
-                      <form className="space-y-0" onSubmit={Post}>
+                      <form className="space-y-0">
                         <input
                           type="text"
                           value={headline}
@@ -128,6 +177,7 @@ const Happening: React.FC = () => {
                           </div>
                           <button
                             type="submit"
+                            onClick={StorePosts}
                             className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-neutral-200 transition"
                           >
                             Post
@@ -140,6 +190,45 @@ const Happening: React.FC = () => {
               )}
             </AnimatePresence>
           </div>
+          <div className="flex justify-center px-4 mt-10">
+  <div className="w-full max-w-3xl space-y-6">
+    {posts.map((post) => (
+      <div
+        key={post.id}
+        className=" p-6 border-zinc-700 border-b "
+      >
+        {/* Header Section */}
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-sm text-white font-bold">{post.user_id}</p>
+          <span className="text-sm text-gray-400">
+            {new Date(post.created_at).toLocaleDateString()}
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h2 className="text-xl font-semibold text-white mb-2">{post.headline}</h2>
+
+        {/* Content */}
+        <p className="text-gray-300 mb-4">{post.content}</p>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <button className="bg-white px-4 py-2 rounded-full text-black hover:bg-gray-200 transition">
+            Claim True
+          </button>
+          <button className="bg-white px-4 py-2 rounded-full text-black hover:bg-gray-200 transition">
+            Claim False
+          </button>
+          <button className="bg-white px-4 py-2 rounded-full text-black hover:bg-gray-200 transition">
+            Debate
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+
         </div>
       </div>
     </div>

@@ -82,11 +82,12 @@ app.post("/api/v1/insert-into-users-table", async (req, res) => {
 
         const { data, error } = await supabase
             .from("users")
-            .insert([{ username: enteredUsername, email: enteredEmail, password: hashedPassword }]);
-
+            .insert([{ username: enteredUsername, email: enteredEmail, password: hashedPassword }])
+            .select('user_id')
+            .single()
         if (error) throw error;
 
-        res.status(201).json({ message: "User registered successfully", data });
+        res.status(201).json({user_id: data.user_id });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error inserting user" });
@@ -254,6 +255,37 @@ app.get("/api/v1/get-users", async (req, res) => {
       res.status(500).json({ message: "Error updating email" });
     }
   });
+
+//@ts-ignore
+  app.post("/api/v1/store-posts", async (req, res) => {
+  const { headline, content, user_id } = req.body;
+
+  const { data, error } = await supabase
+    .from("posts")
+    .insert([{ title: headline, content: content, user_id: user_id }]);
+
+  if (error)console.log(error)
+
+  res.status(200).json({ data });
+});
+
+// Node.js Express route to get posts
+app.get("/api/v1/get-posts", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    res.status(200).json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+});
+
+
   
 
 const PORT = process.env.PORT ;
