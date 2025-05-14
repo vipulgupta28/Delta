@@ -8,6 +8,8 @@ import HomePage from "../pages/HomePage";
 import ChannelPage from "../pages/ChannelPage";
 import AllChannelsPage from "../pages/AllChannelsPage";
 import TrendingPage from "../pages/TrendingPage";
+import ResearchPage from "../pages/ResearchPage";
+import HappeningsPage from "../pages/HappeningsPage";
 
 const AppRoutes:React.FC = () =>{
     return(
@@ -21,6 +23,8 @@ const AppRoutes:React.FC = () =>{
             <Route path="channelpage" element={<ChannelPage/>}/>
             <Route path="allchannelspage" element={<AllChannelsPage/>}/>
             <Route path="trendingpage" element={<TrendingPage/>}/>
+            <Route path="researchpage" element={<ResearchPage/>}/>
+            <Route path="happeningspage" element={<HappeningsPage/>}/>
         </Routes>
         </>
     )

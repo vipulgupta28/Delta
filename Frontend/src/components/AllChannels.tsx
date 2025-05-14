@@ -39,7 +39,9 @@ const Layout: React.FC = () => {
         </div>
 
         <div className="flex-1 mt-10 px-10 ml-10">
-          <h1 className="font-bold text-4xl mb-6">All Channels</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight border-b border-gray-700 pb-2">
+              Users Channels
+            </h1>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {users.map((user, idx) => (

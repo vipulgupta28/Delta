@@ -60,7 +60,7 @@ const VideoSpace: React.FC = () => {
   };
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center pr-45">
      
       
       <style>{`
@@ -151,7 +151,7 @@ const VideoSpace: React.FC = () => {
           <video
             key={videos[currentIndex].file_url}
             src={videos[currentIndex].file_url}
-            className={`w-full h-100 rounded-lg cursor-pointer transition-all duration-500 ${getSlideAnimation()}`}
+            className={`w-full h-100 rounded-lg cursor-pointer transition-all border duration-500 ${getSlideAnimation()}`}
             controls
             autoPlay
           />

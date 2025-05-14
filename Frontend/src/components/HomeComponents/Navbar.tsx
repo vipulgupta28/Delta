@@ -80,7 +80,7 @@ const Navbar: React.FC = () => {
                     <input 
                         type="text"
                         placeholder="Search for Topics, Channels, Creators"
-                        className="border border-gray-400 rounded-[100px]  p-3 w-200"
+                        className="border border-gray-400 rounded-[100px]  p-3 w-250"
                     />
                     
                     <button
