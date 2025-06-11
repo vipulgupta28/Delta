@@ -10,6 +10,11 @@ import AllChannelsPage from "../pages/AllChannelsPage";
 import TrendingPage from "../pages/TrendingPage";
 import ResearchPage from "../pages/ResearchPage";
 import HappeningsPage from "../pages/HappeningsPage";
+import UserPostsPage from "../pages/UserPostsPage";
+import DetailNewsPage from "../pages/DetailNewsPage";
+import UsersUploadsPage from "../pages/UsersUploadPage";
+import ProfilePage from "../pages/ProfilePage";
+import DebateRoomsPage from "../pages/DebateRoomsPage";
 
 const AppRoutes:React.FC = () =>{
     return(
@@ -25,6 +30,11 @@ const AppRoutes:React.FC = () =>{
             <Route path="trendingpage" element={<TrendingPage/>}/>
             <Route path="researchpage" element={<ResearchPage/>}/>
             <Route path="happeningspage" element={<HappeningsPage/>}/>
+            <Route path="detailnewspage" element={<DetailNewsPage/>}/>
+            <Route path="userpostspage" element={<UserPostsPage/>}/>
+            <Route path="usersuploadspage" element={<UsersUploadsPage/>}/>
+            <Route path="debateroomspage" element={<DebateRoomsPage/>}/>
+            <Route path="profilepage" element={<ProfilePage/>}/>
         </Routes>
         </>
     )

@@ -2,12 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useUser } from "../../context/UserContext";
 
 
 const Navbar: React.FC = () => {
+
     const [visible, setVisible] = useState(false);
-    const [storedUsername, setStoredUsername] = useState<string | null>(null);
-    const [email, setStoredEmail] = useState("");
+  
+
+    const {username} = useUser()
+    const {email} = useUser()
+
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
     const toggleDropdown = () => {
@@ -25,19 +30,8 @@ const Navbar: React.FC = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    useEffect(() => {
-        const username = localStorage.getItem("username");
-        setStoredUsername(username);
-    }, []);
 
-    useEffect(() => {
-        const storedEmail = localStorage.getItem("email");
-        if (storedEmail) {
-          setStoredEmail(storedEmail);
-        } else {
-          setStoredEmail("your email"); 
-        }
-      }, []);
+
 
     const changeUsername = async () =>{
         navigate("/otpgatewaypage")
@@ -87,7 +81,7 @@ const Navbar: React.FC = () => {
                         onClick={toggleDropdown}
                         className="bg-white hover:cursor-pointer hover:bg-gray-200 rounded-full font-bold transition duration-400 w-auto px-5 h-13 flex items-center justify-center text-black"
                     >
-                        {storedUsername ?? "User"}
+                        {username ?? "User"}
                     </button>
                 </div>
 
@@ -103,7 +97,7 @@ const Navbar: React.FC = () => {
                         >
                             <ul className="flex flex-col gap-2 font-bold">
                                 <li
-                                onClick={()=>navigate("/ChannelPage")}
+                                onClick={()=>navigate("/profilepage")}
                                  className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">My Channel</li>
                                
                                 <li 
@@ -127,6 +121,8 @@ const Navbar: React.FC = () => {
                                 <li
                                 onClick={signout} 
                                 className="hover:bg-gray-100 p-2 rounded cursor-pointer text-black font-medium ">Sign Out</li>
+
+                                
                             </ul>
                         </motion.div>
                     )}

@@ -4,6 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
+import { createServer } from "http";
+import { Server } from "socket.io";
 import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
@@ -258,13 +260,15 @@ app.get("/api/v1/get-users", async (req, res) => {
 
 //@ts-ignore
   app.post("/api/v1/store-posts", async (req, res) => {
-  const { headline, content, user_id } = req.body;
+  const { headline, content, user_id, username } = req.body;
 
   const { data, error } = await supabase
     .from("posts")
-    .insert([{ title: headline, content: content, user_id: user_id }]);
+    .insert([{ title: headline, content: content, user_id: user_id, username:username }])
+    .select()
+    ;
 
-  if (error)console.log(error)
+  if (error)console.log("username ka chakkar")
 
   res.status(200).json({ data });
 });
@@ -284,6 +288,82 @@ app.get("/api/v1/get-posts", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch posts" });
   }
 });
+
+
+
+app.get("/api/v1/get-userposts/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", userId) // assuming the column name is user_id
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+});
+
+
+
+
+app.post("/api/v1/likes", async (req, res) => {
+  const { user_id, post_id } = req.body;
+
+  try {
+    // 1. Insert into likes table
+    const { error: insertError } = await supabase
+      .from("likes")
+      .insert([{ user_id, post_id }]);
+
+    if (insertError) throw insertError;
+
+    // 2. Increment likes_count in posts table
+    const { error: updateError } = await supabase.rpc("increment_likes_count", {
+      post_id_input: post_id,
+    });
+
+    if (updateError) throw updateError;
+
+    res.status(200).json({ message: "Liked successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to like post" });
+  }
+});
+
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: { origin: "*" },
+});
+
+let rooms: Record<string, { name: string; description: string }> = {};
+
+app.post("/api/v1/create-room", (req, res) => {
+  const { name, description } = req.body;
+  const roomId = Math.random().toString(36).substr(2, 9);
+  rooms[roomId] = { name, description };
+  res.json({ roomId, name, description });
+});
+
+io.on("connection", (socket) => {
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
+  });
+
+  socket.on("send-message", ({ roomId, message, sender }) => {
+    io.to(roomId).emit("receive-message", { message, sender });
+  });
+});
+
+
 
 
   

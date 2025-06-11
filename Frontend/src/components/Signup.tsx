@@ -6,6 +6,8 @@ import axios from "axios";
 import toast from 'react-hot-toast';
 import { motion } from "framer-motion";
 
+
+
 const Signup: React.FC = () => {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [showPass, setShowPass] = useState(false);
@@ -85,7 +87,7 @@ const Signup: React.FC = () => {
          const userId = response.data.user_id; 
         localStorage.setItem('email',input);
         localStorage.setItem('username',username);
-         localStorage.setItem('user_id', userId);
+        localStorage.setItem('user_id', userId);
         
         setTimeout(() => {
           setLoading(false);

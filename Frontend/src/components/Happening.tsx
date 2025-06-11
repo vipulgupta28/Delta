@@ -4,71 +4,49 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Sidebar from "./HomeComponents/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "../context/UserContext";
+import { MdOutlineComment } from "react-icons/md";
+import { FaShare } from "react-icons/fa";
+
+import LikeComponent from "./LikeComponent";
 
 type Post = {
-  id: string;
+  post_id: string;
+  title:string;
   headline: string;
   content: string;
   created_at: string;
   user_id: string;
+  username:string;
 };
 
 const Happening: React.FC = () => {
   const [isVisible, setisVisible] = useState(false);
   const [headline, setHeadline] = useState("");
   const [content, setContent] = useState("");
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
+
+  const [posts,setPosts] = useState<Post[]>([]);
+
   
  
-  const fetchPosts = async (pageNum: number) => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-    try {
-      const res = await axios.get(`http://localhost:3000/api/v1/get-posts?page=${pageNum}&limit=5`);
-      const newPosts = res.data;
+ const {userId} = useUser();
+ const {username} = useUser();
 
-      if (newPosts.length === 0) {
-        setHasMore(false);
-      } else {
-        setPosts(prev => [...prev, ...newPosts]);
-        setPage(prev => prev + 1);
-      }
-    } catch (err) {
-      toast.error("Failed to load posts");
-    } finally {
-      setLoading(false);
-    }
-  };
+ console.log(username)
 
-  useEffect(() => {
-    fetchPosts(page);
-    const onScroll = () => {
-      if (
-        window.innerHeight + window.scrollY >= document.body.scrollHeight - 100 &&
-        !loading &&
-        hasMore
-      ) {
-        fetchPosts(page);
-      }
-    };
-
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [page, loading, hasMore]);
+  
 
   const createPost = () => {
     setisVisible(true);
   };
 
   const StorePosts = async () => {
-    const user_id= localStorage.getItem('user_id')
+ 
     const response = await axios.post("http://localhost:3000/api/v1/store-posts",{
         headline: headline,
         content:content,
-        user_id: user_id
+        user_id: userId,
+        username:username
     });
 
     if(response.status === 200){
@@ -77,8 +55,56 @@ const Happening: React.FC = () => {
   }
 
 
+  useEffect(()=>{
+    fetchPosts();
+  },[])
 
+
+
+
+  const fetchPosts = async () => {
+  try {
+    const response = await axios.get("http://localhost:3000/api/v1/get-posts");
+    setPosts(response.data); 
+    console.log(response.data)
+
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    toast.error("Failed to fetch posts");
+  }
+}
   
+
+
+const handleLike = async(postID:string) =>{
+
+  const response = await axios.post("http://localhost:3000/api/v1/likes",{
+    user_id: userId,
+    post_id: postID,
+
+  })
+   if(response.status === 200){
+      toast.success("liked")
+    }
+    else{
+      toast.error("errror");
+    }
+
+}
+
+
+const [comments, setComments] = useState(false);
+
+const toggleComments = () =>{
+
+  setComments(!comments);
+
+
+}
+
+// const handleShare = () =>{
+
+// }
     
 
   return (
@@ -182,6 +208,14 @@ const Happening: React.FC = () => {
                           >
                             Post
                           </button>
+
+                          <button
+                            type="submit"
+                            onClick={StorePosts}
+                            className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-neutral-200 transition"
+                          >
+                            Post Anonymously
+                          </button>
                         </div>
                       </form>
                     </div>
@@ -190,43 +224,104 @@ const Happening: React.FC = () => {
               )}
             </AnimatePresence>
           </div>
-          <div className="flex justify-center px-4 mt-10">
-  <div className="w-full max-w-3xl space-y-6">
-    {posts.map((post) => (
-      <div
-        key={post.id}
-        className=" p-6 border-zinc-700 border-b "
+
+              <div className="flex min-h-screen bg-black text-white">
+  {/* Posts Section */}
+  <div className="flex-1 border-l border-r border-zinc-800 p-6">
+    {posts.length > 0 ? (
+      posts.map((post) => (
+        <div key={post.post_id} className="mb-6 p-4 border border-zinc-800 rounded-lg">
+          <div className="flex gap-2 pb-5"> 
+              <img src={"https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg"} className="h-8 w-8 rounded-full" alt="" />
+
+                <h3 className="text-xl font-bold text-white hover:cursor-pointer hover:underline">{post.username}</h3>
+          </div>
+        
+          <h3 className="text-[15px] font-bold text-white">{post.title}</h3>
+          <p className="text-gray-300 mt-2">{post.content}</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Posted on: {new Date(post.created_at).toLocaleString()}
+          </p>
+        <div className="flex items-center gap-4 mt-6">
+  {/* Like Button */}
+  <button
+    className="flex items-center justify-center p-2  rounded-full transition-colors"
+    onClick={() => handleLike(post.post_id)}
+  >
+    <LikeComponent />
+  </button>
+
+  {/* Comment Button */}
+  <button
+  onClick={toggleComments}
+   className="flex items-center justify-center hover:cursor-pointer p-2 hover:bg-zinc-900 rounded-full transition-colors">
+    <MdOutlineComment className="text-zinc-200 h-5 w-5" />
+  </button>
+
+
+
+  {comments && (
+  <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+    <div className="bg-black border border-zinc-800 p-6 rounded-xl text-white w-full max-w-[1000px] h-[80vh] max-h-[600px] relative shadow-xl flex flex-col">
+      <button
+        className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"
+        onClick={toggleComments}
       >
-        {/* Header Section */}
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-sm text-white font-bold">{post.user_id}</p>
-          <span className="text-sm text-gray-400">
-            {new Date(post.created_at).toLocaleDateString()}
-          </span>
-        </div>
-
-        {/* Headline */}
-        <h2 className="text-xl font-semibold text-white mb-2">{post.headline}</h2>
-
-        {/* Content */}
-        <p className="text-gray-300 mb-4">{post.content}</p>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          <button className="bg-white px-4 py-2 rounded-full text-black hover:bg-gray-200 transition">
-            Claim True
-          </button>
-          <button className="bg-white px-4 py-2 rounded-full text-black hover:bg-gray-200 transition">
-            Claim False
-          </button>
-          <button className="bg-white px-4 py-2 rounded-full text-black hover:bg-gray-200 transition">
-            Debate
-          </button>
-        </div>
+        ✕
+      </button>
+      <h2 className="text-xl font-semibold mb-4">Comments</h2>
+      <div className="flex-1 overflow-y-auto">
+        {/* Comment list goes here - this will scroll if content exceeds height */}
+        <p className="text-gray-300">No comments yet...</p>
       </div>
-    ))}
+      {/* Optional comment input at bottom */}
+      <div className="mt-4  flex gap-5 pt-4 border-t border-zinc-700">
+        <input
+          className="w-full bg-zinc-800 rounded-lg p-3 text-white focus:outline-none "
+          placeholder="Add a comment..."
+         
+        />
+        <button className="mt-2 bg-white text-black hover:bg-gray-200 px-4 py-2 rounded-lg">
+          Post
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+  {/* Share Button */}
+  <button className="flex items-center justify-center p-2 hover:cursor-pointer hover:bg-zinc-900 rounded-full transition-colors">
+    <FaShare className="text-zinc-200 h-5 w-5" />
+  </button>
+</div>
+
+        </div>
+      ))
+    ) : (
+      <p className="text-gray-500">No posts available.</p>
+    )}
+  </div>
+
+  {/* Categories Sidebar */}
+  <div className="w-[250px] border border-zinc-800 p-6">
+    <h2 className="text-3xl font-extrabold text-center border-gray-700 pb-2">Looking for ?</h2>
+    {/* Replace this with actual category list */}
+    <ul className="space-y-2 text-gray-300">
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">General news</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Technology</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Business and Economy</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Science</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Health</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Law and Policy</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Entertainment and Lifestyle</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Sports</li>
+      <li className="hover:text-white cursor-pointer hover:bg-zinc-800 hover:rounded-xl animation duration-400 p-3">Global</li>
+
+    </ul>
   </div>
 </div>
+
 
 
         </div>

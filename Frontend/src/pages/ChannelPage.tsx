@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "../components/HomeComponents/Navbar";
-import Sidebar from "../components/HomeComponents/Sidebar";
+import DashBoardSidebar from "../components/DashBoardSidebar";
 import Channel from "../components/Channel";
 
 const ChannelPage: React.FC = () => {
@@ -9,7 +9,7 @@ const ChannelPage: React.FC = () => {
       <Navbar />
 
       <div className="flex flex-1 text-white">
-        <Sidebar />
+        <DashBoardSidebar />
 
         <div className="flex flex-1 justify-center bg-black w-full">
           <Channel />
