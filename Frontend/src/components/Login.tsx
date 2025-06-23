@@ -3,6 +3,7 @@ import {  useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from 'react-hot-toast';
+import { useUser } from "../context/UserContext";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const Login: React.FC = () => {
@@ -38,6 +39,7 @@ const Login: React.FC = () => {
   };
 
   const handleLogin = async () => {
+    
     setLoading(true);
     setError("");
 

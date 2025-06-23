@@ -90,6 +90,12 @@ app.post("/api/v1/insert-into-users-table", async (req, res) => {
         if (error) throw error;
 
         res.status(201).json({user_id: data.user_id });
+
+        await supabase
+        .from("profiles")
+        .insert([{user_id:data.user_id}]);
+
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error inserting user" });
@@ -176,10 +182,91 @@ app.post("/api/v1/store-content", upload.single("video"), async (req, res) => {
 
 
 
+
+
+
+//@ts-ignore
+app.post("/api/v1/store-short-content", upload.single("video"), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded." });
+        }
+
+        const { title, description } = req.body;  
+        const file = req.file;
+        const fileName = `${Date.now()}_${file.originalname}`;
+
+        const { data, error } = await supabase
+            .storage
+            .from("shortvideos")  
+            .upload(`${fileName}`, file.buffer, {
+                contentType: file.mimetype,
+                cacheControl: "3600",
+                upsert: false
+            });
+
+        if (error) {
+            throw error;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+            .from("shortvideos")
+            .getPublicUrl(`${fileName}`);
+
+        console.log("Uploaded File Public URL:", publicUrlData.publicUrl);
+
+        const {error: insertError} = await supabase
+            .from("short_videos_metadata") 
+            .insert([
+                {
+                    file_name: fileName,
+                    file_url: publicUrlData.publicUrl,
+                    uploaded_at: new Date(), 
+                    title: title, 
+                    description: description, 
+                    
+                },
+            ]);
+            if (insertError) {
+  console.error("Database Insert Error:", insertError);
+  return res.status(500).json({ error: "DB insert failed", detail: insertError });
+}
+
+        res.status(200).json({ publicUrl: publicUrlData.publicUrl });
+
+    } catch (error) {
+        console.error("Upload Failed:", error);
+        res.status(500).json({ error: "File upload failed." });
+    }
+});
+
+
+
+
+
+
+
 app.get("/api/v1/get-videos", async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("videos_metadata")
+            .select("file_url, file_name, title, description, uploaded_at");
+
+        if (error) throw error;
+
+        res.status(200).json(data);
+    } catch (error) {
+        console.error("Error fetching videos:", error);
+        res.status(500).json({ error: "Failed to fetch videos" });
+    }
+});
+
+
+
+app.get("/api/v1/get-short-videos", async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from("short_videos_metadata")
             .select("file_url, file_name, title, description, uploaded_at");
 
         if (error) throw error;
@@ -260,11 +347,11 @@ app.get("/api/v1/get-users", async (req, res) => {
 
 //@ts-ignore
   app.post("/api/v1/store-posts", async (req, res) => {
-  const { headline, content, user_id, username } = req.body;
+  const { headline, content, user_id, selectedCategory, username } = req.body;
 
   const { data, error } = await supabase
     .from("posts")
-    .insert([{ title: headline, content: content, user_id: user_id, username:username }])
+    .insert([{ title: headline, content: content, user_id: user_id, username:username, category:selectedCategory }])
     .select()
     ;
 
@@ -337,6 +424,169 @@ app.post("/api/v1/likes", async (req, res) => {
     res.status(500).json({ error: "Failed to like post" });
   }
 });
+
+
+//@ts-ignore
+app.post("/api/v1/handleProfileChanges", upload.fields([
+  { name: "banner", maxCount: 1 },
+  { name: "profile", maxCount: 1 }
+  //@ts-ignore
+]), async (req, res) => {
+  const { userId, bio, location } = req.body;
+
+  if (!userId || !bio) {
+    return res.status(400).json({ error: "User ID and bio are required." });
+  }
+
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const bannerFile = files?.banner?.[0];
+  const profileFile = files?.profile?.[0];
+  let bannerUrl = null;
+  let profileUrl = null;
+
+  try {
+    // Handle Banner Upload
+    
+    if (bannerFile) {
+      const bannerFileName = `${userId}/banner-${Date.now()}-${bannerFile.originalname}`;
+      const { error: bannerError } = await supabase.storage
+        .from("user-assets") // your Supabase storage bucket
+        .upload(bannerFileName, bannerFile.buffer, {
+          contentType: bannerFile.mimetype,
+          upsert: true,
+        });
+
+      if (bannerError) throw bannerError;
+
+      const { data: bannerPublicUrl } = supabase
+        .storage
+        .from("user-assets")
+        .getPublicUrl(bannerFileName);
+      bannerUrl = bannerPublicUrl.publicUrl;
+    }
+
+    if (profileFile) {
+      const profileFileName = `${userId}/profile-${Date.now()}-${profileFile.originalname}`;
+      const { error: profileError } = await supabase.storage
+        .from("user-assets")
+        .upload(profileFileName, profileFile.buffer, {
+          contentType: profileFile.mimetype,
+          upsert: true,
+        });
+
+      if (profileError) throw profileError;
+
+      const { data: profilePublicUrl } = supabase
+        .storage
+        .from("user-assets")
+        .getPublicUrl(profileFileName);
+      profileUrl = profilePublicUrl.publicUrl;
+    }
+
+    // Now update Supabase DB
+    const { data, error } = await supabase
+      .from("profiles")
+      .upsert([{
+        user_id: userId,
+        bio,
+        location,
+        banner_img: bannerUrl,
+        profile_img: profileUrl,
+      }], { onConflict: 'user_id' })
+      .select();
+
+    if (error) {
+      console.error("Supabase Error:", error);
+      return res.status(500).json({ error: "Failed to update profile." });
+    }
+
+    res.status(200).json({ message: "Profile updated successfully", data });
+
+  } catch (err) {
+    console.error("Server Error:");
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+});
+
+
+//@ts-ignore
+app.get("/api/v1/getProfileChanges/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required." });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("user_id, bio, location, banner_img, profile_img")
+      .eq("user_id", userId)
+      .single(); // Ensures only one record is fetched
+
+    if (error || !data) {
+      console.error("Error fetching profile:", error || "No data found");
+      return res.status(404).json({ error: "Profile not found." });
+    }
+
+    res.status(200).json({ profile: data });
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Unexpected server error." });
+  }
+});
+
+
+
+//@ts-ignore
+app.post("/api/v1/handleFollow", async (req, res) => {
+  const { followerId, followingId } = req.body;
+
+  if (!followerId || !followingId) {
+    return res.status(400).json({ error: "Missing followerId or followingId" });
+  }
+
+  try {
+    // Step 1: Get current follower count of the target user
+    const { data: targetUserData, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("followers")
+      .eq("id", followingId)
+      .single();
+
+    // Step 2: Get current following count of the logged-in user
+    const { data: currentUserData, error: currentUserError } = await supabase
+      .from("profiles")
+      .select("following")
+      .eq("id", followerId)
+      .single();
+
+    if (targetUserError || currentUserError) {
+      return res.status(500).json({ error: "Failed to fetch profile counts." });
+    }
+
+    const newFollowers = (targetUserData?.followers || 0) + 1;
+    const newFollowing = (currentUserData?.following || 0) + 1;
+
+    // Step 3: Update both users
+    const [{ error: updateTargetError }, { error: updateCurrentError }] = await Promise.all([
+      supabase.from("profiles").update({ followers: newFollowers }).eq("id", followingId),
+      supabase.from("profiles").update({ following: newFollowing }).eq("id", followerId),
+    ]);
+
+    if (updateTargetError || updateCurrentError) {
+      return res.status(500).json({ error: "Failed to update counts." });
+    }
+
+    return res.status(200).json({ message: "Follow updated successfully" });
+
+  } catch (err) {
+    return res.status(500).json({ error: "Unexpected server error" });
+  }
+});
+
+
+
 
 
 const httpServer = createServer(app);

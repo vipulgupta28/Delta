@@ -3,7 +3,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 
-const Channel: React.FC = () => {
+const Shorts: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -38,7 +38,7 @@ const Channel: React.FC = () => {
     try {
       setUploading(true);
       const res = await axios.post(
-        "http://localhost:3000/api/v1/store-content",
+        "http://localhost:3000/api/v1/store-short-content",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -83,7 +83,7 @@ const Channel: React.FC = () => {
           className="text-2xl font-bold mb-8 tracking-tight"
           variants={itemVariants}
         >
-          Upload Content
+          Upload Short Content
         </motion.h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -208,4 +208,4 @@ const Channel: React.FC = () => {
   );
 };
 
-export default Channel;
+export default Shorts;

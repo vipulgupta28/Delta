@@ -10,16 +10,16 @@ const DashBoardSidebar: React.FC = () => {
     <>
       <div className="  w-50  ml-5 text-white flex flex-col gap-10 p-5 ">
         <button
-        onClick={()=>navigate("/channelpage")}
+         onClick={()=>navigate("/channelpage")}
          className="hover:hover:bg-[#2c2c2c]  hover:cursor-pointer w-50 animation duration-400 p-2 rounded flex gap-5 justify-left"><MdNewspaper fontSize={24}/>Upload News</button>
 
         <button
-        onClick={()=>navigate("/usersuploadspage")}
+         onClick={()=>navigate("/usersuploadspage")}
          className="hover:hover:bg-[#2c2c2c]  hover:cursor-pointer w-50 animation duration-400 p-2 rounded flex gap-5 justify-left"><MdNewspaper fontSize={24}/>My Uploads</button>
 
         <button 
-        onClick={()=>navigate("/userpostspage")}
-        className="hover:hover:bg-[#2c2c2c]  hover:cursor-pointer w-50 animation duration-400 p-2 rounded flex gap-5 justify-left"><FaFire fontSize={24}/>My posts</button>
+         onClick={()=>navigate("/userpostspage")}
+         className="hover:hover:bg-[#2c2c2c]  hover:cursor-pointer w-50 animation duration-400 p-2 rounded flex gap-5 justify-left"><FaFire fontSize={24}/>My posts</button>
 
         
         <button 

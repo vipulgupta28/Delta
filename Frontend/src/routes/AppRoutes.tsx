@@ -15,6 +15,7 @@ import DetailNewsPage from "../pages/DetailNewsPage";
 import UsersUploadsPage from "../pages/UsersUploadPage";
 import ProfilePage from "../pages/ProfilePage";
 import DebateRoomsPage from "../pages/DebateRoomsPage";
+import UsersProfilePage from "../pages/UsersProfilePage";
 
 const AppRoutes:React.FC = () =>{
     return(
@@ -35,6 +36,9 @@ const AppRoutes:React.FC = () =>{
             <Route path="usersuploadspage" element={<UsersUploadsPage/>}/>
             <Route path="debateroomspage" element={<DebateRoomsPage/>}/>
             <Route path="profilepage" element={<ProfilePage/>}/>
+            <Route path="/usersprofilepage/:userId" element={<UsersProfilePage />} />
+
+
         </Routes>
         </>
     )

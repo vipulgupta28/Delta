@@ -54,7 +54,7 @@ const UsersUploads = () => {
             {/* Video Player */}
             <div className="relative  aspect-video ">
               <video
-                controls
+           
                 className="w-full hover:cursor-pointer h-full object-cover rounded-t-lg"
                 preload="metadata"
               >
