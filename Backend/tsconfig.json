@@ -10,6 +10,7 @@
     "strict": true,
     "skipLibCheck": true,
 
+    "types": ["node", "express"]          /* 👈 include Node + Express types */
   },
   "include": ["src"],                     /* Ensure TypeScript compiles your src folder */
   "exclude": ["node_modules", "dist"]     /* Avoid compiling dependencies */
