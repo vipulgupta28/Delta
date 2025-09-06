@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import app from './app';
 import { supabase } from './config/database';
-import { createToken } from './createToken';
+
 
 // Load environment variables
 dotenv.config();
