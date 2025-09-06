@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from "bcryptjs";
 import { supabase } from '../config/database';
 
 import { sendOtpToEmail } from '../config/email';
