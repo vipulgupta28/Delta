@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const database_1 = require("../config/database");
 const email_1 = require("../config/email");
 const firebaseAdmin_1 = require("./firebaseAdmin");
@@ -27,18 +27,30 @@ class AuthService {
         return false;
     }
     static async signup(userData) {
-        const { username, email, password, captchaToken } = userData;
+        const { username, email, password } = userData;
+        // Hash password
         const saltRounds = 10;
-        const hashedPassword = await bcrypt_1.default.hash(password, saltRounds);
+        const hashedPassword = await bcryptjs_1.default.hash(password, saltRounds);
+        // First check if username OR email already exists
+        const { data: existingUser, error: lookupError } = await database_1.supabase
+            .from('users')
+            .select('user_id')
+            .or(`username.eq.${username},email.eq.${email}`)
+            .maybeSingle();
+        if (lookupError)
+            throw lookupError;
+        if (existingUser) {
+            throw new Error('Username or email already exists');
+        }
+        // Insert new user
         const { data: user, error } = await database_1.supabase
             .from('users')
-            .insert([
-            { username, email, password: hashedPassword },
-        ])
+            .insert([{ username, email, password: hashedPassword }])
             .select('user_id, username, email')
             .single();
         if (error)
             throw error;
+        // Create profile for new user
         const { error: profileError } = await database_1.supabase
             .from('profiles')
             .insert([{ user_id: user.user_id }]);
@@ -51,7 +63,7 @@ class AuthService {
         };
         return { user, tokenPayload };
     }
-    static async login(username, password) {
+    static async login(username, email, password) {
         const { data: user, error } = await database_1.supabase
             .from('users')
             .select('password, username, email, user_id')
@@ -60,7 +72,7 @@ class AuthService {
         if (error || !user) {
             throw new Error('Invalid username or password');
         }
-        const isPasswordValid = await bcrypt_1.default.compare(password, user.password);
+        const isPasswordValid = await bcryptjs_1.default.compare(password, user.password);
         if (!isPasswordValid) {
             throw new Error('Invalid credentials');
         }

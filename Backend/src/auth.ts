@@ -144,9 +144,9 @@ router.post('/verify-otp', (req: Request, res: Response) => {
 //@ts-ignore
 router.post('/signup', async (req: Request, res: Response) => {
   try {
-    const { enteredUsername, enteredPassword, enteredEmail, captchaToken } = req.body;
+    const { enteredUsername, enteredPassword, enteredEmail } = req.body;
 
-    if (!enteredUsername || !enteredPassword || !enteredEmail || !captchaToken) {
+    if (!enteredUsername || !enteredPassword || !enteredEmail) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -154,7 +154,6 @@ router.post('/signup', async (req: Request, res: Response) => {
       username: enteredUsername,
       email: enteredEmail,
       password: enteredPassword,
-      captchaToken,
     });
 
     const token = createToken(tokenPayload);
@@ -174,13 +173,13 @@ router.post('/signup', async (req: Request, res: Response) => {
 //@ts-ignore
 router.post('/login', async (req: Request, res: Response) => {
   try {
-    const { enteredUsername, enteredEmail } = req.body;
+    const { enteredUsername, enteredEmail, enteredPassword } = req.body;
 
-    if (!enteredUsername || !enteredEmail) {
+    if (!enteredUsername || !enteredEmail || !enteredPassword) {
       return res.status(400).json({ error: 'Username and email are required' });
     }
 
-    const { user, tokenPayload } = await AuthService.login(enteredUsername, enteredEmail);
+    const { user, tokenPayload } = await AuthService.login(enteredUsername, enteredEmail, enteredPassword);
 
     const token = createToken(tokenPayload);
     setAuthCookie(res, token);

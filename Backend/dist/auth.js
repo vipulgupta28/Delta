@@ -114,15 +114,14 @@ router.post('/verify-otp', (req, res) => {
 //@ts-ignore
 router.post('/signup', async (req, res) => {
     try {
-        const { enteredUsername, enteredPassword, enteredEmail, captchaToken } = req.body;
-        if (!enteredUsername || !enteredPassword || !enteredEmail || !captchaToken) {
+        const { enteredUsername, enteredPassword, enteredEmail } = req.body;
+        if (!enteredUsername || !enteredPassword || !enteredEmail) {
             return res.status(400).json({ error: 'All fields are required' });
         }
         const { user, tokenPayload } = await authService_1.AuthService.signup({
             username: enteredUsername,
             email: enteredEmail,
             password: enteredPassword,
-            captchaToken,
         });
         const token = (0, jwt_1.createToken)(tokenPayload);
         (0, jwt_1.setAuthCookie)(res, token);
@@ -140,11 +139,11 @@ router.post('/signup', async (req, res) => {
 //@ts-ignore
 router.post('/login', async (req, res) => {
     try {
-        const { enteredUsername, enteredEmail } = req.body;
-        if (!enteredUsername || !enteredEmail) {
+        const { enteredUsername, enteredEmail, enteredPassword } = req.body;
+        if (!enteredUsername || !enteredEmail || !enteredPassword) {
             return res.status(400).json({ error: 'Username and email are required' });
         }
-        const { user, tokenPayload } = await authService_1.AuthService.login(enteredUsername, enteredEmail);
+        const { user, tokenPayload } = await authService_1.AuthService.login(enteredUsername, enteredEmail, enteredPassword);
         const token = (0, jwt_1.createToken)(tokenPayload);
         (0, jwt_1.setAuthCookie)(res, token);
         console.log('Login cookie set');

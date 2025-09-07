@@ -6,70 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authService_1 = require("../services/authService");
 const jwt_1 = require("../utils/jwt");
-const nodemailer_1 = __importDefault(require("nodemailer"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const crypto_1 = __importDefault(require("crypto"));
-const database_1 = require("../config/database");
 const router = (0, express_1.Router)();
-router.post("/send-magic-link", async (req, res) => {
-    const { email } = req.body;
-    // Generate secure token
-    const token = crypto_1.default.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 mins
-    // Save token in DB
-    await database_1.supabase
-        .from("magic_links")
-        .insert([{ email, token, expires_at: expiresAt, used: false }]);
-    // Construct link
-    const magicLink = `http://localhost:3000/magic-login?token=${token}`;
-    // Send email
-    const transporter = nodemailer_1.default.createTransport({
-        service: "Gmail", // or SES/SendGrid
-        auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_PASS
-        }
-    });
-    await transporter.sendMail({
-        from: '"News App" <no-reply@newsapp.com>',
-        to: email,
-        subject: "Your Magic Login Link",
-        html: `<p>Click to log in: <a href="${magicLink}">${magicLink}</a></p>`
-    });
-    res.json({ message: "Magic link sent!" });
-});
-//@ts-ignore
-// Magic login verification
-router.get("/magic-login", async (req, res) => {
-    const { token } = req.query;
-    if (!token || typeof token !== "string") {
-        return res.status(400).json({ error: "Invalid token" });
-    }
-    // Look up token in DB
-    const { data: magicLink, error } = await database_1.supabase
-        .from("magic_links")
-        .select("*")
-        .eq("token", token)
-        .single();
-    if (error || !magicLink) {
-        return res.status(400).json({ error: "Token not found" });
-    }
-    if (magicLink.used) {
-        return res.status(400).json({ error: "Token already used" });
-    }
-    if (new Date(magicLink.expiresAt) < new Date()) {
-        return res.status(400).json({ error: "Token expired" });
-    }
-    // Mark as used
-    await database_1.supabase
-        .from("magic_links")
-        .update({ used: true })
-        .eq("token", token);
-    // Generate JWT/session
-    const jwtToken = jsonwebtoken_1.default.sign({ email: magicLink.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    // Redirect user back to frontend with token
-    return res.redirect(`http://localhost:5173/magic-login?token=${jwtToken}`);
-});
 //@ts-ignore
 router.post('/get-otp', async (req, res) => {
     try {
@@ -114,15 +52,14 @@ router.post('/verify-otp', (req, res) => {
 //@ts-ignore
 router.post('/signup', async (req, res) => {
     try {
-        const { enteredUsername, enteredPassword, enteredEmail, captchaToken } = req.body;
-        if (!enteredUsername || !enteredPassword || !enteredEmail || !captchaToken) {
+        const { enteredUsername, enteredPassword, enteredEmail } = req.body;
+        if (!enteredUsername || !enteredPassword || !enteredEmail) {
             return res.status(400).json({ error: 'All fields are required' });
         }
         const { user, tokenPayload } = await authService_1.AuthService.signup({
             username: enteredUsername,
             email: enteredEmail,
             password: enteredPassword,
-            captchaToken,
         });
         const token = (0, jwt_1.createToken)(tokenPayload);
         (0, jwt_1.setAuthCookie)(res, token);
@@ -133,6 +70,9 @@ router.post('/signup', async (req, res) => {
     }
     catch (error) {
         console.error('Signup error:', error);
+        if (error.message.includes('exists')) {
+            return res.status(409).json({ message: error.message });
+        }
         res.status(500).json({ message: 'Error creating user' });
     }
 });
@@ -140,11 +80,11 @@ router.post('/signup', async (req, res) => {
 //@ts-ignore
 router.post('/login', async (req, res) => {
     try {
-        const { enteredUsername, enteredEmail } = req.body;
-        if (!enteredUsername || !enteredEmail) {
-            return res.status(400).json({ error: 'Username and email are required' });
+        const { enteredUsername, enteredEmail, enteredPassword } = req.body;
+        if (!enteredUsername || !enteredEmail || !enteredPassword) {
+            return res.status(400).json({ error: 'Username , email and password are required' });
         }
-        const { user, tokenPayload } = await authService_1.AuthService.login(enteredUsername, enteredEmail);
+        const { user, tokenPayload } = await authService_1.AuthService.login(enteredUsername, enteredEmail, enteredPassword);
         const token = (0, jwt_1.createToken)(tokenPayload);
         (0, jwt_1.setAuthCookie)(res, token);
         console.log('Login cookie set');

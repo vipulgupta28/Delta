@@ -3,8 +3,8 @@ export const APP_NAME = 'Delta';
 export const APP_VERSION = '1.0.0';
 
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-export const API_TIMEOUT = 10000;
+export const API_BASE_URL = "http://localhost:3000/api/v1";
+export const API_TIMEOUT = 30000;
 
 // Pagination
 export const DEFAULT_PAGE_SIZE = 10;

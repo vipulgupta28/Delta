@@ -32,41 +32,52 @@ export class AuthService {
     username: string;
     email: string;
     password: string;
-    captchaToken: string;
   }) {
-    const { username, email, password, captchaToken } = userData;
-
-   
-
+    const { username, email, password } = userData;
+  
+    // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+  
+    // First check if username OR email already exists
+    const { data: existingUser, error: lookupError } = await supabase
+      .from('users')
+      .select('user_id')
+      .or(`username.eq.${username},email.eq.${email}`)
+      .maybeSingle();
+  
+    if (lookupError) throw lookupError;
+    if (existingUser) {
+      throw new Error('Username or email already exists');
+    }
+  
+    // Insert new user
     const { data: user, error } = await supabase
       .from('users')
-      .insert([
-        { username, email, password: hashedPassword },
-      ])
+      .insert([{ username, email, password: hashedPassword }])
       .select('user_id, username, email')
       .single();
-
+  
     if (error) throw error;
-
+  
+    // Create profile for new user
     const { error: profileError } = await supabase
       .from('profiles')
       .insert([{ user_id: user.user_id }]);
-
+  
     if (profileError) throw profileError;
-
+  
     const tokenPayload = {
       username: user.username,
       email: user.email,
       user_id: user.user_id,
     };
-
+  
     return { user, tokenPayload };
   }
+  
 
-  static async login(username: string, password: string) {
+  static async login(username: string, email:string, password: string) {
     const { data: user, error } = await supabase
       .from('users')
       .select('password, username, email, user_id')

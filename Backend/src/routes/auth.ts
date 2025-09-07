@@ -11,89 +11,6 @@ const router = Router();
 
 
 
-router.post("/send-magic-link", async(req:Request, res:Response)=>{
-  const { email } = req.body;
-
-  // Generate secure token
-  const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 mins
-
-  // Save token in DB
-  await supabase
-  .from("magic_links")
-  .insert([{ email, token, expires_at: expiresAt, used: false }]);
-
-
-  // Construct link
-  const magicLink = `http://localhost:3000/magic-login?token=${token}`;
-
-  // Send email
-  const transporter = nodemailer.createTransport({
-    service: "Gmail", // or SES/SendGrid
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS
-    }
-  });
-
-  await transporter.sendMail({
-    from: '"News App" <no-reply@newsapp.com>',
-    to: email,
-    subject: "Your Magic Login Link",
-    html: `<p>Click to log in: <a href="${magicLink}">${magicLink}</a></p>`
-  });
-
-  res.json({ message: "Magic link sent!" });
-})
-
-
-//@ts-ignore
-// Magic login verification
-router.get("/magic-login", async (req: Request, res: Response) => {
-  const { token } = req.query;
-
-  if (!token || typeof token !== "string") {
-    return res.status(400).json({ error: "Invalid token" });
-  }
-
-  // Look up token in DB
-  const { data: magicLink, error } = await supabase
-    .from("magic_links")
-    .select("*")
-    .eq("token", token)
-    .single();
-
-  if (error || !magicLink) {
-    return res.status(400).json({ error: "Token not found" });
-  }
-
-  if (magicLink.used) {
-    return res.status(400).json({ error: "Token already used" });
-  }
-
-  if (new Date(magicLink.expiresAt) < new Date()) {
-    return res.status(400).json({ error: "Token expired" });
-  }
-
-  // Mark as used
-  await supabase
-    .from("magic_links")
-    .update({ used: true })
-    .eq("token", token);
-
-  // Generate JWT/session
-  const jwtToken = jwt.sign(
-    { email: magicLink.email },
-    process.env.JWT_SECRET!,
-    { expiresIn: "7d" }
-  );
-
-  // Redirect user back to frontend with token
-  return res.redirect(`http://localhost:5173/magic-login?token=${jwtToken}`);
-
-});
-
-
 
 
 //@ts-ignore
@@ -144,9 +61,9 @@ router.post('/verify-otp', (req: Request, res: Response) => {
 //@ts-ignore
 router.post('/signup', async (req: Request, res: Response) => {
   try {
-    const { enteredUsername, enteredPassword, enteredEmail, captchaToken } = req.body;
+    const { enteredUsername, enteredPassword, enteredEmail } = req.body;
 
-    if (!enteredUsername || !enteredPassword || !enteredEmail || !captchaToken) {
+    if (!enteredUsername || !enteredPassword || !enteredEmail) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -154,7 +71,6 @@ router.post('/signup', async (req: Request, res: Response) => {
       username: enteredUsername,
       email: enteredEmail,
       password: enteredPassword,
-      captchaToken,
     });
 
     const token = createToken(tokenPayload);
@@ -164,23 +80,27 @@ router.post('/signup', async (req: Request, res: Response) => {
       message: 'Signup and login successful', 
       user_id: user.user_id 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup error:', error);
+    if (error.message.includes('exists')) {
+      return res.status(409).json({ message: error.message });
+    }
     res.status(500).json({ message: 'Error creating user' });
   }
 });
+
 
 // Login
 //@ts-ignore
 router.post('/login', async (req: Request, res: Response) => {
   try {
-    const { enteredUsername, enteredEmail } = req.body;
+    const { enteredUsername, enteredEmail, enteredPassword } = req.body;
 
-    if (!enteredUsername || !enteredEmail) {
-      return res.status(400).json({ error: 'Username and email are required' });
+    if (!enteredUsername || !enteredEmail || !enteredPassword) {
+      return res.status(400).json({ error: 'Username , email and password are required' });
     }
 
-    const { user, tokenPayload } = await AuthService.login(enteredUsername, enteredEmail);
+    const { user, tokenPayload } = await AuthService.login(enteredUsername, enteredEmail, enteredPassword);
 
     const token = createToken(tokenPayload);
     setAuthCookie(res, token);
