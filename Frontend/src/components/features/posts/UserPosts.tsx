@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+
 import toast from "react-hot-toast";
 import { MdOutlineComment } from "react-icons/md";
 import { FaShare } from "react-icons/fa";

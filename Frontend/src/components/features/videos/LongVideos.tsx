@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 import CustomVideoPlayer from "./CustomVideoPlayer";
 import { ThumbsUp, ThumbsDown, Reply, MessageCircle,MoreVertical,X } from "lucide-react";
 import api from "../../../api/api";

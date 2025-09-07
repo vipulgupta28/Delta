@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 import UsersUploads from "./UsersUploads";
 import { Shorts } from "../videos";
 import api from "../../../api/api";
