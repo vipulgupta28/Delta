@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import api from "../../../api/api";
 
 interface User {
   username: string;
@@ -11,7 +12,7 @@ const AllChannels: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/v1/get-users");
+        const res = await api.get("/get-users");
         if (res.data && res.data.success) {
           setUsers(res.data.users);
           console.log("Fetched users:", res.data.users);

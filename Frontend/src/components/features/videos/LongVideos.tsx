@@ -112,7 +112,7 @@ const LongVideos = () => {
 
   const handleLikeDislike = async (commentId: string, type: "like" | "dislike") => {
     try {
-      const res = await axios.post(`http://localhost:3000/api/v1/comment/${type}`, {
+      const res = await api.post(`/comment/${type}`, {
         comment_id: commentId,
         user_id: userId,  
       });
@@ -130,13 +130,13 @@ const LongVideos = () => {
 
   const handleLikeDislikeforLongVideos = async (video_id: string, type: "like" | "dislike") => {
     try {
-      const res = await axios.post(`http://localhost:3000/api/v1/handle-long-video-reactions/${type}`, {
+      const res = await api.post(`/handle-long-video-reactions/${type}`, {
         video_id,
         user_id: userId,
       });
   
       if (res.status === 200) {
-        const statsRes = await axios.get(`http://localhost:3000/api/v1/long-videos-reactions/summary/${video_id}`);
+        const statsRes = await api.get(`/long-videos-reactions/summary/${video_id}`);
         const { likes, dislikes, user_liked, user_disliked } = statsRes.data;
   
         // Update video list
@@ -173,7 +173,7 @@ const LongVideos = () => {
     const content = parentId ? replyContent : commentContent;
 if (!content.trim()) return;
 
-  const response = await axios.post("http://localhost:3000/api/v1/handle-long-comments",{
+  const response = await api.post("/handle-long-comments",{
       content: content,
       username:username,
       user_id:userId,
@@ -204,7 +204,7 @@ const currentVideoId = selectedVideo.id;
 
 setIsLoading(true);
 try {
-  const response = await axios.get(`http://localhost:3000/api/v1/fetch-long-comments/${currentVideoId}`);
+  const response = await api.get(`/fetch-long-comments/${currentVideoId}`);
  const flat = response.data;
   const nested = nestComments(flat);
   setComments(flat);
@@ -367,15 +367,15 @@ commentList.map((comment) => (
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:3000/api/v1/get-videos");
+        const response = await api.get("/get-videos");
         const rawVideos: Video[] = response.data;
     
         // Now fetch reactions for each video in parallel
         const videosWithReactions = await Promise.all(
           rawVideos.map(async (video) => {
             try {
-              const statsRes = await axios.get(
-                `http://localhost:3000/api/v1/long-videos-reactions/summary/${video.id}?user_id=${userId}`
+              const statsRes = await api.get(
+                `/long-videos-reactions/summary/${video.id}?user_id=${userId}`
               );
               const { likes, dislikes, user_liked, user_disliked } = statsRes.data;
               return {

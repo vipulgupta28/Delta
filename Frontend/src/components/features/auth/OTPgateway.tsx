@@ -3,6 +3,7 @@ import OTPcomponent from './OTPcomponent';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import api from '../../../api/api';
 
 const OTPgateway: React.FC = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
@@ -29,7 +30,7 @@ const OTPgateway: React.FC = () => {
   const handleSubmit = async () => {
     const otpValue = otp.join('');
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/verify-otp", {
+      const response = await api.post("/verify-otp", {
         otp: otpValue,
         userEmail: email,  
       });
@@ -49,7 +50,7 @@ const OTPgateway: React.FC = () => {
   
   const resendOtp = async () => {
     try {
-      await axios.post("http://localhost:3000/api/v1/get-otp", {
+      await api.post("/get-otp", {
         data: email
       });
       toast.success("OTP resent successfully!");

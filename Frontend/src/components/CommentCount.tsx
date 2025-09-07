@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { CommentSection } from "./features/interactions";
+import api from "../api/api";
 
 interface Post {
   id: string;
@@ -14,7 +14,7 @@ export default function CommentCount({ post }: { post: Post }) {
 
   useEffect(() => {
     const fetchCount = async () => {
-      const res = await axios.get(`http://localhost:3000/api/v1/comments/${post.id}`);
+      const res = await api.get(`/comments/${post.id}`);
       setCommentCount(res.data.length);
     };
     fetchCount();

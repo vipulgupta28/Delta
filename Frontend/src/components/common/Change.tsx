@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../api/api";
 import toast from "react-hot-toast";
 
 const Change: React.FC = () => {
@@ -14,7 +15,7 @@ const Change: React.FC = () => {
 
   const updateUsername = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/update-username", {
+      const response = await api.post("/update-username", {
         email: localStorage.getItem("email"),
         newUsername: newUsername,
       });
@@ -35,7 +36,7 @@ const Change: React.FC = () => {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/update-password", {
+      const response = await api.post("/update-password", {
         email: localStorage.getItem("email"),
         newPassword: newPassword,
       });
@@ -51,7 +52,7 @@ const Change: React.FC = () => {
 
   const updateEmail = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/update-email", {
+      const response = await api.post("/update-email", {
         oldEmail: localStorage.getItem("email"),
         newEmail: newEmail,
       });

@@ -110,8 +110,8 @@ useEffect(() => {
 
   const fetchMutuals = async () => {
     try {
-      const { data } = await axios.get(
-        `http://localhost:3000/api/v1/getMutuals/${userId}`
+      const { data } = await api.get(
+        `/getMutuals/${userId}`
       );
       setMutuals(data.mutuals);
       setFilteredMutuals(data.mutuals);
@@ -193,8 +193,8 @@ useEffect(() => {
     });
   
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/store-posts",
+      const response = await api.post(
+        "/store-posts",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -224,7 +224,7 @@ useEffect(() => {
 
   const fetchPosts = async (category?: string) => {
     try {
-      const response = await axios.get("http://localhost:3000/api/v1/get-posts", {
+      const response = await api.get("/get-posts", {
         params: category ? { category: category.toLowerCase() } : {}
 
       });
@@ -241,7 +241,7 @@ useEffect(() => {
 
 const handleLike = async(postID:string) =>{
 
-  const response = await axios.post("http://localhost:3000/api/v1/likes",{
+  const response = await api.post("/likes",{
     user_id: userId,
     post_id: postID,
 
@@ -272,7 +272,7 @@ const handleShare = async (postId: string) => {
       post_id: postId,
     });
 
-    await axios.post("http://localhost:3000/api/v1/sharePost", {
+    await api.post("/sharePost", {
       sender_id: userId,
       receiver_ids: [selectedUser.user_id],
       post_id: postId,

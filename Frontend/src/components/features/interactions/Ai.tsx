@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import api from '../../../api/api';
 
 interface Source {
   name: string;
@@ -20,7 +21,7 @@ function AI() {
     setSources([]);
     
     try {
-      const res = await axios.post('http://localhost:3000/api/query', { query });
+      const res = await api.post('/query', { query });
       setAnswer(res.data.answer);
       setSources(res.data.sources);
     } catch (error) {

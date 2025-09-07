@@ -54,8 +54,8 @@ const Channel: React.FC = () => {
 
     try {
       setUploading(true);
-      const res = await axios.post(
-        "http://localhost:3000/api/v1/store-content",
+      const res = await api.post(
+        "/store-content",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

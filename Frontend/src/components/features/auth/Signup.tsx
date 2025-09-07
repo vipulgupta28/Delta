@@ -6,6 +6,7 @@ import axios from "axios";
 import toast from 'react-hot-toast';
 import { motion } from "framer-motion";
 import ReCAPTCHA from "react-google-recaptcha"
+import api from "../../../api/api";
 
 
 const Signup: React.FC = () => {
@@ -44,7 +45,7 @@ const Signup: React.FC = () => {
   const checkUsername = async (username: string) => {
     try {
       setAvailability("checking");
-      const res = await axios.get(`http://localhost:3000/api/v1/check-username?username=${username}`);
+      const res = await api.get(`/check-username?username=${username}`);
       setAvailability(res.data.exists ? "taken" : "available");
     } catch (error) {
       console.error("Error checking username", error);
@@ -83,7 +84,7 @@ const Signup: React.FC = () => {
     }
     try {
       setSending(true);
-      const res = await axios.post("http://localhost:3000/api/v1/get-otp", { data: input });
+      const res = await api.post("/get-otp", { data: input });
 
       if(res.status ===  200){
         toast.success("OTP sent to your email");
@@ -100,7 +101,7 @@ const Signup: React.FC = () => {
     const otpString = otp.join("");
     try {
       setVerifying(true);
-      const response = await axios.post("http://localhost:3000/api/v1/verify-otp", {
+      const response = await api.post("/verify-otp", {
         otp: otpString,
         userEmail: input,
       });
@@ -148,7 +149,7 @@ const Signup: React.FC = () => {
     }
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:3000/api/v1/signup", {
+      const response = await api.post("/signup", {
         enteredUsername: username,
         enteredEmail: input,
         enteredPassword: password,

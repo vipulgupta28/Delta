@@ -65,7 +65,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await api.get(`http://localhost:3000/api/v1/getProfileChanges/${targetId}`);
+        const response = await api.get(`/getProfileChanges/${targetId}`);
         if (response.status === 200) {
           setBio(response.data.profile.bio || "");
           setBannerImg(response.data.profile.banner_img || "");
@@ -91,7 +91,7 @@ useEffect(() => {
 
  const handleFollow = async (targetUserId: string) => {
   try {
-    const response = await axios.post("http://localhost:3000/api/v1/handleFollow", {
+    const response = await api.post("/handleFollow", {
       follower_id: userId,        // logged-in user
       following_id: targetUserId  // the user you want to follow
     });

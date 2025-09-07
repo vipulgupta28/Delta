@@ -39,7 +39,7 @@ const UsersUploads = () => {
 
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/v1/get-videos/${userId}`);
+      const response = await api.get(`/get-videos/${userId}`);
       setVideos(response.data);
     } catch (err) {
       console.error("Error fetching videos:", err);

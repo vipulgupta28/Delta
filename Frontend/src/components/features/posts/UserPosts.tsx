@@ -6,6 +6,7 @@ import { FaShare } from "react-icons/fa";
 import { LikeComponent } from "../interactions";
 import {CommentSection} from "../interactions";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "../../../api/api";
 
 type Post = {
   post_id: string;
@@ -42,7 +43,7 @@ const UserPosts: React.FC<UserPostsProps> = ({ userId }) => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/v1/get-userposts/${userId}`);
+      const response = await api.get(`/get-userposts/${userId}`);
       setPosts(response.data);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -52,7 +53,7 @@ const UserPosts: React.FC<UserPostsProps> = ({ userId }) => {
 
   const handleLike = async (postID: string) => {
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/likes", {
+      const response = await api.post("/likes", {
         user_id: userId,
         post_id: postID,
       });
