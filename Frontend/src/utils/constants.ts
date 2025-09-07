@@ -3,7 +3,7 @@ export const APP_NAME = 'Delta';
 export const APP_VERSION = '1.0.0';
 
 // API Configuration
-export const API_BASE_URL = "http://localhost:3000/api/v1";
+export const API_BASE_URL = "https://delta-3-vm3v.onrender.com/api/v1";
 export const API_TIMEOUT = 30000;
 
 // Pagination
