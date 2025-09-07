@@ -24,7 +24,7 @@ export const setAuthCookie = (res: Response, token: string): void => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: "none",
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   });
 };
