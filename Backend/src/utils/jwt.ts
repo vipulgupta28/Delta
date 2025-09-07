@@ -23,7 +23,7 @@ export const createToken = (payload: TokenPayload): string => {
 export const setAuthCookie = (res: Response, token: string): void => {
   res.cookie('token', token, {
     httpOnly: true,
-    secure: false, // true in production with HTTPS
+    secure: true,
     sameSite: 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   });
