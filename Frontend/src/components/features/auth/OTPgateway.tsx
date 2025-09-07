@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import OTPcomponent from './OTPcomponent';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+
 import toast from 'react-hot-toast';
 import api from '../../../api/api';
 

@@ -2,7 +2,6 @@ import React, { useState,useRef,useEffect } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import OTPcomponent from "./OTPcomponent";
-import axios from "axios";
 import toast from 'react-hot-toast';
 import { motion } from "framer-motion";
 import ReCAPTCHA from "react-google-recaptcha"
