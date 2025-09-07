@@ -1,5 +1,4 @@
 import React, { useEffect, useState , useRef} from "react";
-import axios from "axios";
 import { ThumbsUp, ThumbsDown, MessageCircle, MoreVertical, Share, X,Reply } from "lucide-react";
 import { FaArrowUp, FaArrowDown, FaPlay, FaPause } from 'react-icons/fa';
 import api from "../../../api/api";
@@ -128,7 +127,7 @@ const handleMore = (commentId: string) => {
 
 const handleLikeDislike = async (commentId: string, type: "like" | "dislike") => {
   try {
-    const res = await axios.post(`http://localhost:3000/api/v1/comment/${type}`, {
+    const res = await api.post(`/comment/${type}`, {
       comment_id: commentId,
       user_id: userId,  
     });
@@ -147,14 +146,14 @@ const handleLikeDislike = async (commentId: string, type: "like" | "dislike") =>
 useEffect(() => {
   const fetchVideos = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/v1/get-short-videos");
+      const response = await api.get("/get-short-videos");
       const videoData: Video[] = response.data;
 
       // Fetch likes/dislikes for each video
       const videosWithStats = await Promise.all(
         videoData.map(async (video) => {
           try {
-            const res = await axios.get(`http://localhost:3000/api/v1/shorts-reactions/summary/${video.id}`);
+            const res = await api.get(`/shorts-reactions/summary/${video.id}`);
             return {
               ...video,
               likes: res.data.likes || 0,
@@ -179,14 +178,14 @@ useEffect(() => {
   
 const handleLikeDislikeforshorts = async (video_id: string, type: "like" | "dislike") => {
   try {
-    const res = await axios.post(`http://localhost:3000/api/v1/handle-shorts-reactions/${type}`, {
+    const res = await api.post(`/handle-shorts-reactions/${type}`, {
       video_id,
       user_id: userId,
     });
 
     if (res.status === 200) {
       // Fetch updated like/dislike count for this video
-      const statsRes = await axios.get(`http://localhost:3000/api/v1/shorts-reactions/summary/${video_id}`);
+      const statsRes = await api.get(`/shorts-reactions/summary/${video_id}`);
       const { likes, dislikes } = statsRes.data;
      
 
@@ -288,7 +287,7 @@ const handleLikeDislikeforshorts = async (video_id: string, type: "like" | "disl
       const content = parentId ? replyContent : commentContent;
   if (!content.trim()) return;
 
-    const response = await axios.post("http://localhost:3000/api/v1/handle-shorts-comments",{
+    const response = await api.post("/handle-shorts-comments",{
         content: content,
         username:username,
         user_id:userId,
@@ -319,7 +318,7 @@ const handleLikeDislikeforshorts = async (video_id: string, type: "like" | "disl
 
   setIsLoading(true);
   try {
-    const response = await axios.get(`http://localhost:3000/api/v1/fetch-shorts-comments/${currentVideoId}`);
+    const response = await api.get(`/fetch-shorts-comments/${currentVideoId}`);
    const flat = response.data;
     const nested = nestComments(flat);
     setComments(flat);
